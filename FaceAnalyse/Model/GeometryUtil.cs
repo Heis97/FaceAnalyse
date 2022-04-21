@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Geometry;
 
-namespace FaceAnalyse
+namespace Model
 {
     public struct VertexGl
     {
         public Point3d_GL p;
         public Point3d_GL n;
-        public PointF t;
+        public Geometry.PointF t;
         public VertexGl(Point3d_GL _p, Point3d_GL _n, PointF _t)
         {
             p = _p;

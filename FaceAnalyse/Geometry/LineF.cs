@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FaceAnalyse
+namespace Geometry
 {
    public  enum PlanType { X,Y};
     public class LineF

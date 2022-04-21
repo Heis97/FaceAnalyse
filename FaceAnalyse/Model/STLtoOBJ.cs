@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenGL;
 
-namespace FaceAnalyse
+namespace Model
 {
     
     public class STLtoOBJ

@@ -37,6 +37,7 @@ namespace FaceAnalyse
             this.trackBar_Z_L = new System.Windows.Forms.TrackBar();
             this.but_textureVision = new System.Windows.Forms.Button();
             this.imageBox1 = new Emgu.CV.UI.ImageBox();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_X_L)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Y_L)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Z_L)).BeginInit();
@@ -51,7 +52,7 @@ namespace FaceAnalyse
             this.glControl1.ColorBits = ((uint)(24u));
             this.glControl1.DepthBits = ((uint)(24u));
             this.glControl1.Location = new System.Drawing.Point(12, 12);
-            this.glControl1.MultisampleBits = ((uint)(0u));
+            this.glControl1.MultisampleBits = ((uint)(8u));
             this.glControl1.Name = "glControl1";
             this.glControl1.Size = new System.Drawing.Size(1000, 1000);
             this.glControl1.StencilBits = ((uint)(0u));
@@ -73,8 +74,8 @@ namespace FaceAnalyse
             // trackBar_X_L
             // 
             this.trackBar_X_L.Location = new System.Drawing.Point(1347, 10);
-            this.trackBar_X_L.Maximum = 1000;
-            this.trackBar_X_L.Minimum = -1000;
+            this.trackBar_X_L.Maximum = 100;
+            this.trackBar_X_L.Minimum = -100;
             this.trackBar_X_L.Name = "trackBar_X_L";
             this.trackBar_X_L.Size = new System.Drawing.Size(225, 45);
             this.trackBar_X_L.TabIndex = 2;
@@ -83,8 +84,8 @@ namespace FaceAnalyse
             // trackBar_Y_L
             // 
             this.trackBar_Y_L.Location = new System.Drawing.Point(1347, 61);
-            this.trackBar_Y_L.Maximum = 1000;
-            this.trackBar_Y_L.Minimum = -1000;
+            this.trackBar_Y_L.Maximum = 100;
+            this.trackBar_Y_L.Minimum = -100;
             this.trackBar_Y_L.Name = "trackBar_Y_L";
             this.trackBar_Y_L.Size = new System.Drawing.Size(225, 45);
             this.trackBar_Y_L.TabIndex = 3;
@@ -93,12 +94,12 @@ namespace FaceAnalyse
             // trackBar_Z_L
             // 
             this.trackBar_Z_L.Location = new System.Drawing.Point(1347, 112);
-            this.trackBar_Z_L.Maximum = 1000;
-            this.trackBar_Z_L.Minimum = -1000;
+            this.trackBar_Z_L.Maximum = 100;
+            this.trackBar_Z_L.Minimum = -100;
             this.trackBar_Z_L.Name = "trackBar_Z_L";
             this.trackBar_Z_L.Size = new System.Drawing.Size(225, 45);
             this.trackBar_Z_L.TabIndex = 4;
-            this.trackBar_Z_L.Value = 80;
+            this.trackBar_Z_L.Value = 40;
             this.trackBar_Z_L.Scroll += new System.EventHandler(this.trackBar_Z_L_Scroll);
             // 
             // but_textureVision
@@ -120,11 +121,20 @@ namespace FaceAnalyse
             this.imageBox1.TabStop = false;
             this.imageBox1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.imageBox1_Move);
             // 
+            // richTextBox1
+            // 
+            this.richTextBox1.Location = new System.Drawing.Point(1019, 61);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.Size = new System.Drawing.Size(322, 152);
+            this.richTextBox1.TabIndex = 7;
+            this.richTextBox1.Text = "";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1904, 1041);
+            this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.imageBox1);
             this.Controls.Add(this.but_textureVision);
             this.Controls.Add(this.trackBar_Z_L);
@@ -152,6 +162,7 @@ namespace FaceAnalyse
         private System.Windows.Forms.TrackBar trackBar_Z_L;
         private System.Windows.Forms.Button but_textureVision;
         private Emgu.CV.UI.ImageBox imageBox1;
+        private System.Windows.Forms.RichTextBox richTextBox1;
     }
 }
 

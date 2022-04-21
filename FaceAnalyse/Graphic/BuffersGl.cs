@@ -4,87 +4,41 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Geometry;
 
-namespace FaceAnalyse
+namespace Graphic
 {
 
     public class BuffersGl
     {
-
+        public int countObj = 0;
         List<openGlobj> objs;
-        public List<openGlobj> objs_out;
+        public List<openGlobj> objs_dynamic;
+        public List<openGlobj> objs_static;
         public BuffersGl()
         {
             objs = new List<openGlobj>();
-            objs_out = new List<openGlobj>();
+            objs_dynamic = new List<openGlobj>();
+            objs_static = new List<openGlobj>();
         }
-        public void add_obj(openGlobj opgl_obj)
+        public int add_obj(openGlobj opgl_obj)
         {
-           // Console.WriteLine(opgl_obj.vertex_buffer_data.Length + " " + opgl_obj.tp);
-            objs.Add(opgl_obj);
             if (opgl_obj.animType == openGlobj.AnimType.Dynamic)
             {
-                objs_out.Add(opgl_obj);
+                objs_dynamic.Add(opgl_obj);
+                countObj++;
+                return countObj - 1;
             }
-        }
-
-        public void add_obj_id(float[] data_v, int id, bool visible, PrimitiveType primitiveType)
-        {
-            int ind = 0;
-            if(data_v ==null)
+            else
             {
-                return;
+                objs.Add(opgl_obj);
+                return -1;
             }
-            if (objs.Count != 0)
-            {
-                foreach (var ob in objs_out)
-                {
-                    if (ob.id == id)
-                    {
-                        var lam_obj = ob;
-                        if (visible)
-                        {
-                            lam_obj.visible = true;
-                            var data_n_ = new float[data_v.Length];
-                            var data_c_ = new float[data_v.Length];
-                            for (int i = 0; i < data_v.Length; i++)
-                            {
-                                data_c_[i] = 1f;
-                                data_n_[i] = 1f;
-                            }
-                            lam_obj.vertex_buffer_data = data_v;
-                            lam_obj.color_buffer_data = data_c_;
-                            lam_obj.normal_buffer_data = data_n_;
-                            objs_out[ind] = lam_obj;
-                            return;
-                        }
-                        else
-                        {
-                            lam_obj.visible = false;
-                            objs_out[ind] = lam_obj;
-                            return;
-                        }
-
-                    }
-                    ind++;
-                }
-
-            }
-            var data_n = new float[data_v.Length];
-            var data_c = new float[data_v.Length];
-            var data_t = new float[data_v.Length];
-            for (int i = 0; i < data_v.Length; i++)
-            {
-                data_c[i] = 1f;
-                data_n[i] = 1f;
-                data_t[i] = 1f;
-            }
-            //Console.WriteLine("new ver " + id+" all "+ind);
-            add_obj(new openGlobj(data_v, data_c, data_n,data_t, primitiveType, id));
+               
         }
         public void sortObj()
         {
-            objs_out = new List<openGlobj>();
+            objs_static = new List<openGlobj>();
             foreach (PrimitiveType val_tp in Enum.GetValues(typeof(PrimitiveType)))
             {
                 var vertex_buffer_data = new List<float>();
@@ -102,37 +56,58 @@ namespace FaceAnalyse
                         texture_buffer_data.AddRange(objs[i].texture_buffer_data);
 
                     }
-                    if (objs[i].animType == openGlobj.AnimType.Dynamic)
-                    {
-                        objs_out.Add(objs[i]);
-                    }
                 }
 
                 if (vertex_buffer_data.Count > 2)
                 {
 
-                    objs_out.Add(new openGlobj(vertex_buffer_data.ToArray(), color_buffer_data.ToArray(), normal_buffer_data.ToArray(), texture_buffer_data.ToArray(), val_tp));
+                    objs_static.Add(new openGlobj(vertex_buffer_data.ToArray(), color_buffer_data.ToArray(), normal_buffer_data.ToArray(), texture_buffer_data.ToArray(), val_tp));
                 }
 
             }
         }
+
         public void removeObj(int id)
         {
-            var objs_lam = new openGlobj[objs.Count];
-            objs.CopyTo(objs_lam);
-            objs = new List<openGlobj>();
-            objs_out = new List<openGlobj>();
-
-            foreach (var ob in objs_lam)
-            {
-                if (ob.id != id)
-                {
-                    objs.Add(ob);
-                }
-            }
-            sortObj();
+            objs_dynamic[id] = new openGlobj();
         }
-       
+
+        #region setters
+        public void setScale(int id, int i, float _scale)
+        {
+            objs_dynamic[id] = objs_dynamic[id].setScale(i, _scale);
+        }
+        public void setTransfObj(int id, int i, Point3d_GL _transl, Point3d_GL _rotate)
+        {
+            objs_dynamic[id] = objs_dynamic[id].setTransf(i, _transl, _rotate);
+        }
+        public void setXobj(int id, int i, double x)
+        {
+            objs_dynamic[id] = objs_dynamic[id].setX(i, x);
+        }
+        public void setYobj(int id, int i, double y)
+        {
+            objs_dynamic[id] = objs_dynamic[id].setY(i, y);
+        }
+        public void setZobj(int id, int i, double z)
+        {
+            objs_dynamic[id] = objs_dynamic[id].setZ(i, z);
+        }
+
+        public void setRotXobj(int id, int i, double x)
+        {
+            objs_dynamic[id] = objs_dynamic[id].setRotX(i, x);
+        }
+        public void setRotYobj(int id, int i, double y)
+        {
+            objs_dynamic[id] = objs_dynamic[id].setRotY(i, y);
+        }
+        public void setRotZobj(int id, int i, double z)
+        {
+            objs_dynamic[id] = objs_dynamic[id].setRotZ(i,z);
+        }
+        #endregion
+
 
     }
 

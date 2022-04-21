@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FaceAnalyse
+namespace Geometry
 {
 
     public struct Vector3d_GL

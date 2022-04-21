@@ -10,6 +10,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Graphic;
+using Model;
+using Geometry;
 
 namespace FaceAnalyse
 {
@@ -20,35 +23,34 @@ namespace FaceAnalyse
         public MainForm()
         {
             InitializeComponent();
-            glControl1.MouseWheel += GL1.Form1_mousewheel;
-            Init();
+            GL1.lightXscroll(trackBar_X_L.Value);
+            GL1.lightYscroll(trackBar_Y_L.Value);
+            GL1.lightZscroll(trackBar_Z_L.Value);
+            glControl1.MouseWheel += GL1.Form1_mousewheel; 
         }
         void Init()
         {
-            //GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(10, 0, 0), new Point3d_GL(0, 30, 0), new Point3d_GL(0, 0, 60));
-            //var loader = new Model3d();
             var model = new Model3d("Model.obj");
-            var pict = new Mat("Model.png");
-            CvInvoke.Resize(pict, pict, new Size(800, 800));
-            imageBox1.Image = pict;
-            //Console.WriteLine("loaded");
-            GL1.add_buff_gl_obj(model.mesh, model.texture, model.normale, PrimitiveType.Triangles);
-
-
-           // Console.WriteLine("added");
-
+            GL1.addOBJ(model.mesh, model.normale, model.texture,0.01f);
+            GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(10, 0, 0), new Point3d_GL(0, 10, 0), new Point3d_GL(0, 0, 10));
         }
 
         #region gl_control
         private void glControl1_ContextCreated(object sender, GlControlEventArgs e)
         {
+            var pict = new Mat("Model.png");
+            CvInvoke.Resize(pict, pict, new Size(800, 800));
+            GL1.pict = pict;
+            imageBox1.Image = pict;
             GL1.glControl_ContextCreated(sender, e);
             var send = (Control)sender;
             var w = send.Width;
             var h = send.Height;
             GL1.addMonitor(new Rectangle(0, 0, w, h), 0);
+            Init();
             GL1.SortObj();
             // pictureBox1.Image = GL1.bmp;
+            //GL1.printDebug(richTextBox1);
         }
 
         private void glControl1_Render(object sender, GlControlEventArgs e)

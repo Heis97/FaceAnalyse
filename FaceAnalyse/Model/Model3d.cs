@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Geometry;
 
-namespace FaceAnalyse
+namespace Model
 {
     public struct Model3d
     {
@@ -14,27 +15,33 @@ namespace FaceAnalyse
         public float[] texture;
         public float[] normale;
         public TriangleGl[] triangles;
-        public Model3d(string _path)
+        public Point3d_GL center;
+        public Model3d(string _path, bool centering = true)
         {
             path = _path;
             var name_list = path.Split('.');
             var format = name_list[name_list.Length - 1].ToLower();
+            var center1 = new Point3d_GL(0, 0, 0);
             if(format == "obj")
             {
                 var triang = new TriangleGl[0];
-                var arrays = parsingObj(path,out triang);
+
+                var arrays = parsingObj(path,out triang,out center1);
                 mesh = arrays[0];
                 texture = arrays[1];
                 normale = arrays[2];
                 triangles = triang;
+                center = center1;
+                
 
             }
             else if(format == "stl")
             {
-                mesh = parsingStl_GL4(path);
+                mesh = parsingStl_GL4(path, out center1);
                 texture = new float[0];
                 normale = new float[0];
                 triangles = null;
+                center = center1;
             }
             else
             {
@@ -42,9 +49,23 @@ namespace FaceAnalyse
                 texture = new float[0];
                 normale = new float[0];
                 triangles = null;
+                center = center1;
+            }
+            if (centering)
+            {
+                this.FrameToCenter();
+            }
+            
+        }
+        public void FrameToCenter()
+        {
+            for(int i=0; i<mesh.Length;i+=3)
+            {
+                mesh[i] -= (float)center.x;
+                mesh[i+1] -= (float)center.y;
+                mesh[i+2] -= (float)center.z;
             }
         }
-        
         public float[] parsingTxt_Tab(string path)
         {
             
@@ -74,45 +95,6 @@ namespace FaceAnalyse
             return mesh;
         }
 
-        static float[] minCompar(float[] val, float[] min)
-        {
-            if(val==null || min==null )
-            {
-                return min;                
-            }
-            if (val.Length != min.Length)
-            {
-                return min;
-            }
-            for(int i=0; i<val.Length;i++)
-            {
-                if(min[i]<val[i])
-                {
-                    min[i] = val[i];
-                }
-            }
-            return min;
-        }
-
-        static float[] maxCompar(float[] val, float[] max)
-        {
-            if (val == null || max == null)
-            {
-                return max;
-            }
-            if (val.Length != max.Length)
-            {
-                return max;
-            }
-            for (int i = 0; i < val.Length; i++)
-            {
-                if (max[i] > val[i])
-                {
-                    max[i] = val[i];
-                }
-            }
-            return max;
-        }
         static public double parseE(string num)
         {
             if (num.Contains("e"))
@@ -144,8 +126,49 @@ namespace FaceAnalyse
 
         }
 
-        static public float[] parsingStl_GL4(string path)
+        static float[] minCompar(float[] val, float[] min)
         {
+            if (val == null || min == null)
+            {
+                return min;
+            }
+            if (val.Length != min.Length)
+            {
+                return min;
+            }
+            for (int i = 0; i < val.Length; i++)
+            {
+                if (min[i] > val[i])
+                {
+                    min[i] = val[i];
+                }
+            }
+            return min;
+        }
+
+        static float[] maxCompar(float[] val, float[] max)
+        {
+            if (val == null || max == null)
+            {
+                return max;
+            }
+            if (val.Length != max.Length)
+            {
+                return max;
+            }
+            for (int i = 0; i < val.Length; i++)
+            {
+                if (max[i] < val[i])
+                {
+                    max[i] = val[i];
+                }
+            }
+            return max;
+        }
+        static public float[] parsingStl_GL4(string path, out Point3d_GL _center)
+        {
+            float[] min_v = new float[] { float.MaxValue, float.MaxValue, float.MaxValue };
+            float[] max_v = new float[] { float.MinValue, float.MinValue, float.MinValue };
             string file1;
             using (StreamReader sr = new StreamReader(path, ASCIIEncoding.ASCII))
             {
@@ -182,15 +205,21 @@ namespace FaceAnalyse
                         ret1[i2] = (float)parseE(vert[1]); i2++;
                         ret1[i2] = (float)parseE(vert[2]); i2++;
                         ret1[i2] = (float)parseE(vert[3]); i2++;
+                        min_v = minCompar(new float[] { ret1[i2 - 3], ret1[i2 - 2], ret1[i2-1] }, min_v);
+                        max_v = maxCompar(new float[] { ret1[i2 - 3], ret1[i2 - 2], ret1[i2-1] }, max_v);
                     }
-
+                    
                 }
             }
+            float x_sr = (max_v[0] - min_v[0]) / 2 + min_v[0];
+            float y_sr = (max_v[1] - min_v[1]) / 2 + min_v[1];
+            float z_sr = (max_v[2] - min_v[2]) / 2 + min_v[2];
+            _center = new Point3d_GL( x_sr, y_sr, z_sr );
             return ret1;
         }
-        static public float[][] parsingObj(string path, out TriangleGl[] triangleGl)
+        static public float[][] parsingObj(string path, out TriangleGl[] triangleGl, out Point3d_GL _center)
         {
-            var ret =new List<float[]>();
+            var ret = new List<float[]>();
             string file1;
             using (StreamReader sr = new StreamReader(path, ASCIIEncoding.ASCII))
             {
@@ -210,7 +239,7 @@ namespace FaceAnalyse
                 {
                     if (vert[0] == "v")
                     {
-                        v_len ++;
+                        v_len++;
                     }
                     if (vert[0] == "vt")
                     {
@@ -222,11 +251,11 @@ namespace FaceAnalyse
                     }
                     if (vert[0] == "f")
                     {
-                        f_len ++;
+                        f_len++;
                     }
                 }
             }
-            float[][] vertex = new float[v_len][]; 
+            float[][] vertex = new float[v_len][];
             float[][] texture = new float[vt_len][];
             float[][] normale = new float[vn_len][];
             int[][] face_v = new int[f_len][];
@@ -260,7 +289,7 @@ namespace FaceAnalyse
                         //Console.WriteLine
                         vertex[i_v] = new float[3];
                         vertex[i_v][0] = (float)parseE(subline[1]);
-                        vertex[i_v][1] = (float)parseE(subline[2]); 
+                        vertex[i_v][1] = (float)parseE(subline[2]);
                         vertex[i_v][2] = (float)parseE(subline[3]);
                         max_v = maxCompar(vertex[i_v], max_v);
                         min_v = minCompar(vertex[i_v], min_v);
@@ -294,7 +323,7 @@ namespace FaceAnalyse
                         face_vt[i_f][0] = parseFace(subline[1])[1];
                         face_vt[i_f][1] = parseFace(subline[2])[1];
                         face_vt[i_f][2] = parseFace(subline[3])[1];
-                        
+
 
                         face_vn[i_f] = new int[3];
                         face_vn[i_f][0] = parseFace(subline[1])[2];
@@ -371,7 +400,7 @@ namespace FaceAnalyse
             float x_sr = (max_v[0] - min_v[0]) / 2 + min_v[0];
             float y_sr = (max_v[1] - min_v[1]) / 2 + min_v[1];
             float z_sr = (max_v[2] - min_v[2]) / 2 + min_v[2];
-            ret.Add(new float[] { x_sr, y_sr, z_sr });
+            _center = new Point3d_GL(x_sr, y_sr, z_sr);
             return ret.ToArray();
         }
         public List<double[,]> parsingStl_GL2(string path)

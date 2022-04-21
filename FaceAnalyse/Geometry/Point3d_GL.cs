@@ -7,9 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FaceAnalyse
-{
-
+namespace Geometry
+{ 
     public struct Point3d_GL
     {
         public double x;
@@ -109,6 +108,10 @@ namespace FaceAnalyse
         {
             return new Point3d_GL(p.x * k, p.y * k, p.z * k);
         }
+        public static Point3d_GL operator *(double k,Point3d_GL p)
+        {
+            return new Point3d_GL(p.x * k, p.y * k, p.z * k);
+        }
         public static Point3d_GL operator *(double[,] matrixA, Point3d_GL p)
         {
             double[,] matrixB = new double[1, 1];
@@ -197,6 +200,14 @@ namespace FaceAnalyse
         public static Point3d_GL operator -(Point3d_GL p1, Point3d_GL p2)
         {
             return new Point3d_GL(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z);
+        }
+        public static Point3d_GL operator -(Point3d_GL p1)
+        {
+            return new Point3d_GL(-p1.x,  - p1.y,- p1.z);
+        }
+        public  Point3d_GL Clone()
+        {
+            return new Point3d_GL(x, y, z);
         }
         public override string ToString()
         {

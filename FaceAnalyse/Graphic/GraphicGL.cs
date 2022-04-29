@@ -188,6 +188,7 @@ namespace Graphic
 
         public void glControl_Render(object sender, GlControlEventArgs e)
         {
+            
             VPs = new Matrix4x4f[4];
             Vs = new Matrix4x4f[4];
             Ps = new Matrix4x4f[4];
@@ -215,7 +216,6 @@ namespace Graphic
                 {
                     foreach(var opglObj in buffersGl.objs_static)
                     {
-                      
                         renderGlobj(opglObj);   
                     }
                 }

@@ -31,8 +31,11 @@ namespace FaceAnalyse
         void Init()
         {
             var model = new Model3d("Model.obj");
+            var cube2 = new Model3d("cube2.obj");
             GL1.addOBJ(model.mesh, model.normale, model.texture,0.01f);
+            //GL1.addSTL(cube2.mesh,PrimitiveType.Triangles,new Point3d_GL(0,0,0),new Point3d_GL(0,0,0));
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(10, 0, 0), new Point3d_GL(0, 10, 0), new Point3d_GL(0, 0, 10));
+            GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(-10, 0, 0), new Point3d_GL(0, -10, 0), new Point3d_GL(0, 0, -10));
         }
 
         #region gl_control
@@ -40,7 +43,9 @@ namespace FaceAnalyse
         {
             var pict = new Mat("Model.png");
             CvInvoke.Resize(pict, pict, new Size(800, 800));
+
             GL1.pict = pict;
+            detectingFace(pict);
             imageBox1.Image = pict;
             GL1.glControl_ContextCreated(sender, e);
             var send = (Control)sender;
@@ -124,6 +129,53 @@ namespace FaceAnalyse
         void detectingFace(Mat mat_face)
         {
 
+            //var recog = FaceRecognitionDotNet.FaceRecognition.Create(_face);
+            var imface = faceImageFromMat(mat_face);
+
+            var param = new FaceRecognitionDotNet.ModelParameter();
+            var fr = FaceRecognitionDotNet.FaceRecognition.Create();
+
+        }
+        FaceRecognitionDotNet.Image faceImageFromMat(Mat mat)
+        {
+            return FaceRecognitionDotNet.FaceRecognition.LoadImage(mat.ToBitmap());
+            /*if (mat.NumberOfChannels==1)
+            {
+                var matData = (byte[,])mat.GetData();
+                var imData = new byte[matData.GetLength(0) * matData.GetLength(1)];
+                int w = matData.GetLength(0);
+                int h = matData.GetLength(1);
+                for (int j=0; j< h;j++)
+                {
+                    for (int i = 0; i < w; i++)
+                    {
+                        imData[j * w + i] = matData[i, j];
+                    }
+                }
+                
+            }
+            else if (mat.NumberOfChannels == 3)
+            {
+                var matData = (byte[,,])mat.GetData();
+                var imData = new byte[matData.GetLength(0) * matData.GetLength(1) * 3];
+                int w = matData.GetLength(0);
+                int h = matData.GetLength(1);
+                for (int j = 0; j < h; j++)
+                {
+                    for (int i = 0; i < w; i++)
+                    {
+
+                        imData[j * w + 3*i] = matData[i, j,0];
+                        imData[j * w + 3 * i + 1] = matData[i, j, 1];
+                        imData[j * w + 3 * i + 2] = matData[i, j, 2];
+                    }
+                }
+                return FaceRecognitionDotNet.FaceRecognition.LoadImage(imData, h, w, 3);
+            }
+            else
+            {
+                return null;
+            }*/
         }
 
         private void glControl1_ContextDestroying(object sender, GlControlEventArgs e)

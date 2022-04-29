@@ -33,8 +33,7 @@ namespace Graphic
             {
                 objs.Add(opgl_obj);
                 return -1;
-            }
-               
+            }               
         }
         public void sortObj()
         {

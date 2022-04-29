@@ -1,4 +1,5 @@
 ﻿
+
 namespace FaceAnalyse
 {
     partial class MainForm
@@ -6,7 +7,8 @@ namespace FaceAnalyse
         /// <summary>
         /// Обязательная переменная конструктора.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+       // private System.ComponentModel.IContainer components = null;
+        System.ComponentModel.IContainer components = null;
 
         /// <summary>
         /// Освободить все используемые ресурсы.

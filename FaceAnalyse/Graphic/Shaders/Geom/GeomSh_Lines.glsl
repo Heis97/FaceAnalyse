@@ -1,6 +1,6 @@
-﻿#version 460 core
+﻿#version 460 
 layout (lines, invocations = 1) in;
-layout (line_strip, max_vertices = 2) out;
+layout (line_strip, max_vertices = 6) out;
 
 uniform vec3 LightPosition_world;
 uniform mat4 VPs[4];
@@ -31,11 +31,23 @@ void main()
 {
    for (int i = 0; i < gl_in.length(); i++)
    { 
+		/*gl_Position = vec4(0.5,0.5,0.5,1);
+		EmitVertex();
+		gl_Position.x+=1;
+		EmitVertex();
+		gl_Position.y+=1;
+		EmitVertex();
+		gl_Position.x-=1;
+		EmitVertex();
+		gl_Position.y-=1;
+		EmitVertex();*/
 	    gl_ViewportIndex = gl_InvocationID;
 		gl_Position = VPs[gl_InvocationID] * vec4(vs_out[i].vertexPosition_world, 1.0);
+
 	    fs_in.Position_world = gl_Position.xyz;
 	    fs_in.Color = vs_out[i].vertexColor;
 		fs_in.TextureUV = vs_out[i].vertexTexture;
 	    EmitVertex();
 	}
+
 }

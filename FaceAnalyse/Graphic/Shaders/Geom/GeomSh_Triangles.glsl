@@ -1,7 +1,6 @@
 ﻿#version 460 core
 layout (triangles, invocations = 1) in;
 layout (triangle_strip, max_vertices = 3) out;
-
 uniform vec3 LightPosition_world;
 uniform mat4 VPs[4];
 uniform mat4 Vs[4];

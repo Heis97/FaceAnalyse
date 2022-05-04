@@ -1,4 +1,4 @@
-﻿#version 460 core
+﻿#version 460 
 
 layout(location = 0) in vec3 _vertexPosition_model;
 layout(location = 1) in vec3 _vertexNormal_model;
@@ -15,10 +15,11 @@ vec2 vertexTexture;
 } vs_out;
 
 void main() 
-{
+{	
 	vs_out.vertexPosition_world =  (ModelMatrix*vec4(_vertexPosition_model,1)).xyz;
-	vs_out.vertexNormal_world = _vertexNormal_model;
+	vs_out.vertexNormal_world =(vec4( _vertexNormal_model,0)).xyz;//ModelMatrix*
 	vs_out.vertexColor = _vertexColor;
 	vs_out.vertexTexture = _vertexTexture;
 	gl_Position = vec4(vs_out.vertexPosition_world,1);
+
 }

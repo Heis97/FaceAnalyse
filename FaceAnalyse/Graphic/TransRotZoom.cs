@@ -69,7 +69,7 @@ namespace Graphic
             zRot = 0;
             off_x = 0;
             off_y = 0;
-            off_z = -400;
+            off_z = -40;
             rect = _rect;
             id = _id;
             type = TRZtype.Master;
@@ -254,7 +254,7 @@ namespace Graphic
 
             if (viewType_ == viewType.Perspective)
             {
-                var _Pm = Matrix4x4f.Perspective(53f, (float)rect.Width / rect.Height, 0.001f, 100000f);
+                var _Pm = Matrix4x4f.Perspective(53f, (float)rect.Width / rect.Height, 0.01f, 1000f);
                 var _Vm = Matrix4x4f.Translated((float)off_x, -(float)off_y, (float)zoom * (float)off_z) *
                     Matrix4x4f.RotatedX((float)xRot) *
                     Matrix4x4f.RotatedY((float)yRot) *

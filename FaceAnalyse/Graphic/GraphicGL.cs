@@ -19,16 +19,20 @@ namespace Graphic
     public enum viewType { Perspective, Ortho }
     public class TextureGL
     {
+        
         public uint id;
         public int binding;
-        public int w, h,ch;
+        public int w, h, ch;
         public PixelFormat pixelFormat;
         InternalFormat internalFormat;
         public float[] data;
+        public TextureGL()
+        {
+        }
         public TextureGL(int _binding, int _w, int _h = 1, PixelFormat _pixelFormat = PixelFormat.Red, float[] _data = null)
         {
-            Console.WriteLine("genTexture");    
-            if(_data!=null)
+            Console.WriteLine("genTexture");
+            if (_data != null)
             {
                 data = (float[])_data.Clone();
             }
@@ -36,28 +40,26 @@ namespace Graphic
             {
                 data = null;
             }
-            var buff = genTexture(_binding, _w, _h, _pixelFormat,data);
+            var buff = genTexture(_binding, _w, _h, _pixelFormat, data);
             id = buff;
             binding = _binding;
             w = _w;
             h = _h;
             pixelFormat = _pixelFormat;
-            Console.WriteLine(w + " " + h + " " + ch+" "+ pixelFormat);
+            Console.WriteLine("bind " + binding + "; w " + w + " h " + h + " ch " + ch + "; " + pixelFormat);
         }
         public float[] getData()
         {
-            //Gl.ActiveTexture(TextureUnit.Texture0 + binding);
             Gl.BindTexture(TextureTarget.Texture2d, id);
-            float[] dataf = new float[w * h ];
+            float[] dataf = new float[w * h * ch];
             Gl.GetTexImage(TextureTarget.Texture2d, 0, pixelFormat, PixelType.Float, dataf);
             //Console.WriteLine(w+" "+h+" "+ch+" "+ dataf.Length);
             return dataf;
         }
         public void setData(float[] data)
         {
-            //Gl.ActiveTexture(TextureUnit.Texture0 + binding);
             Gl.BindTexture(TextureTarget.Texture2d, id);
-            Gl.TexImage2D(TextureTarget.Texture2d, 0, internalFormat, w, h, 0,pixelFormat, PixelType.Float, data);
+            Gl.TexImage2D(TextureTarget.Texture2d, 0, internalFormat, w, h, 0, pixelFormat, PixelType.Float, data);
         }
         uint genTexture(int binding, int w, int h = 1, PixelFormat pixelFormat = PixelFormat.Red, float[] data = null)
         {
@@ -88,11 +90,12 @@ namespace Graphic
             Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, Gl.NEAREST);
             Gl.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, Gl.NEAREST);
             internalFormat = InternalFormat.R32f;
-            if(pixelFormat == PixelFormat.Rgb)
+            if (pixelFormat == PixelFormat.Rgb || pixelFormat == PixelFormat.Rgba)
             {
                 internalFormat = InternalFormat.Rgba32f;
             }
-            Gl.TexImage2D(TextureTarget.Texture2d, 0, internalFormat, w/ch, h, 0, pixelFormat, PixelType.Float, data);
+            Gl.TexImage2D(TextureTarget.Texture2d, 0, internalFormat, w, h, 0, pixelFormat, PixelType.Float, data);
+
             Gl.BindImageTexture((uint)binding, buff_texture, 0, false, 0, BufferAccess.ReadWrite, internalFormat);
             return buff_texture;
         }
@@ -179,7 +182,8 @@ namespace Graphic
         IDs idsLsOne = new IDs();
         IDs idsCs = new IDs();
 
-        TextureGL posData, velData, massData,acsData;
+
+        TextureGL posData, velData, massData,acsData,vertData;
         public List<float[]> dataComputeShader = new List<float[]>();
         bool initComputeShader = false;
         public float[] resultComputeShader;
@@ -188,7 +192,7 @@ namespace Graphic
 
         public void glControl_Render(object sender, GlControlEventArgs e)
         {
-            
+
             VPs = new Matrix4x4f[4];
             Vs = new Matrix4x4f[4];
             Ps = new Matrix4x4f[4];
@@ -207,7 +211,7 @@ namespace Graphic
 
                 txt += "TRZ " + i + ": "+transRotZooms[i].getInfo(transRotZooms.ToArray()).ToString()+"\n";
             }
-            
+
             Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             if (buffersGl.objs_static!=null)
@@ -231,13 +235,12 @@ namespace Graphic
                     }
                 }
             }
-
+            
             rendercout++;
             if(rendercout%renderdelim==0)
             {
                 rendercout = 0;
             }
-            //gpuCompute();
         }
 
         void renderGlobj(openGlobj opgl_obj)
@@ -280,14 +283,13 @@ namespace Graphic
                     }
                     else
                     {
-                        Gl.DrawArrays(opgl_obj.tp, 0, opgl_obj.vert_len);
+                        Gl.DrawArrays(opgl_obj.tp, 0, opgl_obj.vert_len);                       
                     }
                 }
                 catch
                 {
                 }
             }
-            
         }
 
         public void glControl_ContextDestroying(object sender, GlControlEventArgs e)
@@ -303,7 +305,6 @@ namespace Graphic
             Gl.PointSize(3f);
             Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            //var ComputeSourceGL = assembCode(new string[] { @"Graphic\Shaders\Comp\CompSh_N2_gravitation.glsl" });
 
             var VertexSourceGL = assembCode(new string[] { @"Graphic\Shaders\Vert\VertexSh_Models.glsl" });
             var VertexOneSourceGL = assembCode(new string[] { @"Graphic\Shaders\Vert\VertexSh_ModelsOne.glsl" });
@@ -340,6 +341,8 @@ namespace Graphic
             Gl.Enable(EnableCap.DepthTest);
             textureB = textureLoad(pict);
             idsTsOne.TextureID = (int)bindTexture(textureB);
+
+
         }
 
         
@@ -443,24 +446,6 @@ namespace Graphic
         }
 
         #region texture
-        void gpuCompute()
-        {
-            if (initComputeShader)
-            {
-                Gl.UseProgram(idsCs.programID);
-                //use texture
-                //Console.WriteLine(massData.data.Length);
-                Gl.DispatchCompute((uint)massData.data.Length, 1, 1);
-                Gl.MemoryBarrier(MemoryBarrierMask.ShaderImageAccessBarrierBit);
-                var resultPos = posData.getData();
-                var resultVel = velData.getData();
-                var resultAcs = acsData.getData();
-                resultComputeShader = resultPos;
-                //Console.WriteLine(toStringBuf(resultPos, 3, "pos "));
-                //Console.WriteLine(toStringBuf(resultVel, 3, "vel "));
-                //Console.WriteLine(toStringBuf(resultAcs, 3, "acs "));
-            }
-        }
         private void useTexture(uint buff_texture)
         {
             Gl.ActiveTexture(TextureUnit.Texture0);
@@ -524,7 +509,36 @@ namespace Graphic
         #endregion
 
         #region util
+        string toStringBuf(float[] buff, int strip, int substrip, string name)
+        {
+            if (buff == null)
+                return name + " null ";
+            string txt = name + " " + buff.Length;
+            for (int i = 0; i < buff.Length / strip; i++)
+            {
+                txt += "  | \n";
+                for (int j = 0; j < strip; j++)
+                {
+                    
+                    if (substrip != 0)
+                    {
+                        if (j % substrip == 0)
+                        {
+                            txt += "  | ";
+                        }
+                        txt += buff[i * strip + j].ToString() + ", ";
+                    }
+                    else
+                    {
+                        txt += buff[i * strip + j].ToString() + ", ";
+                    }
 
+                }
+            }
+            txt += " |\n--------------------------------\n";
+            return txt;
+
+        }
         public void SaveToFolder(string folder,int id)
         {
             var bitmap = matFromMonitor(id);

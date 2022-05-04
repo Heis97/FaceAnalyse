@@ -97,6 +97,7 @@ namespace Graphic
         }
         uint bindBuffer(float[] data, uint lvl, int strip)
         {
+            
             var buff = Gl.GenBuffer();
             Gl.BindBuffer(BufferTarget.ArrayBuffer, buff);
             Gl.BufferData(BufferTarget.ArrayBuffer, (uint)(4 * data.Length), data, BufferUsage.StaticDraw);
@@ -115,6 +116,8 @@ namespace Graphic
         }
         uint bindBufferInstanceMatr(Matrix4x4f[] data, uint lvl)
         {
+            
+            
             var buff = Gl.GenBuffer();
             Gl.BindBuffer(BufferTarget.ArrayBuffer, buff);
             Gl.BufferData(BufferTarget.ArrayBuffer, (uint)(4*16 * data.Length), data, BufferUsage.DynamicDraw);

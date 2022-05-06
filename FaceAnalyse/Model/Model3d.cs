@@ -467,6 +467,21 @@ namespace Model
 
             return ret1;
         }
+
+        public Point3d_GL take3dfrom2d(PointF point)
+        {
+            if(triangles!=null)
+            {
+                for(int i=0; i<triangles.Length; i++)
+                {
+                    if(triangles[i].affilationPoint(point))
+                    {
+                        return triangles[i].v1.p;
+                    }
+                }
+            }
+            return new Point3d_GL(0, 0, 0);
+        }
     }
 
 }

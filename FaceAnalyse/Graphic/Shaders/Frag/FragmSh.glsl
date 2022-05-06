@@ -6,6 +6,7 @@ uniform vec3 MaterialSpecular;
 uniform float lightPower;
 uniform sampler2D textureSample;
 uniform int textureVis;
+uniform int lightVis;
 
 in GS_FS_INTERFACE
 {
@@ -43,7 +44,16 @@ void main() {
 	    MaterialDiffuseColor = vec3(0.5);
 		MaterialSpecularColor = 0.2*MaterialDiffuseColor;
 	}
+	
+
 	color.xyz = MaterialAmbientColor + MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance*distance) +MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance);
 	color.w = 1.0;
+
+	if(lightVis == 1)
+	{
+		color.xyz = MaterialDiffuseColor;
+	}
+
+
 
 }

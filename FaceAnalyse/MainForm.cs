@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,36 +29,31 @@ namespace FaceAnalyse
             GL1.lightYscroll(trackBar_Y_L.Value);
             GL1.lightZscroll(trackBar_Z_L.Value);
             glControl1.MouseWheel += GL1.Form1_mousewheel; 
-
         }
         void Init()
         {
             var model = new Model3d(@"faces/Model.obj");
             var cube2 = new Model3d(@"faces/cube2.obj");
             GL1.addOBJ(model.mesh, model.normale, model.texture,0.01f);
-           // GL1.addGLMesh(model.mesh, PrimitiveType.Triangles);
-            //GL1.addSTL(model.mesh, PrimitiveType.Triangles, new Point3d_GL(0, 0, 0), new Point3d_GL(0, 0, 0), 0.01f);
-            //GL1.addSTL(cube2.mesh, PrimitiveType.Triangles, new Point3d_GL(0, 0, 0), new Point3d_GL(0, 0, 0), 0.1f);
-            //GL1.addSTL(cube2.mesh,PrimitiveType.Triangles,new Point3d_GL(0,0,0),new Point3d_GL(0,0,0));
+
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(10, 0, 0), new Point3d_GL(0, 10, 0), new Point3d_GL(0, 0, 10));
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(-10, 0, 0), new Point3d_GL(0, -10, 0), new Point3d_GL(0, 0, -10));
         }
-
 
         #region gl_control
         private void glControl1_ContextCreated(object sender, GlControlEventArgs e)
         {
             var pict = new Mat(@"faces/Model.jpg");
-            CvInvoke.Resize(pict, pict, new Size(800, 800));
-
+            //CvInvoke.Resize(pict, pict, new Size(3900, 3400));
+            CvInvoke.Resize(pict, pict, new System.Drawing.Size(800, 800));
             GL1.pict = pict;
-            //detectingFace(pict);
+            detectingFace(pict);
             imageBox1.Image = pict;
             GL1.glControl_ContextCreated(sender, e);
             var send = (Control)sender;
             var w = send.Width;
             var h = send.Height;
-            GL1.addMonitor(new Rectangle(0, 0, w, h), 0);
+            GL1.addMonitor(new System.Drawing.Rectangle(0, 0, w, h), 0);
             Init();
             GL1.SortObj();
             // pictureBox1.Image = GL1.bmp;
@@ -86,7 +80,7 @@ namespace FaceAnalyse
         {
 
             var g = glControl1.CreateGraphics();
-            Pen pen1 = new Pen(Color.Black);
+            System.Drawing.Pen pen1 = new System.Drawing.Pen(System.Drawing.Color.Black);
             pen1.Width = 2;
 
             //g.Clear(Color.White);
@@ -127,6 +121,20 @@ namespace FaceAnalyse
             }
         }
 
+        private void but_light_Vision_Click(object sender, EventArgs e)
+        {
+            if (GL1.lightVis == 0)
+            {
+                GL1.lightVis = 1;
+                but_light.Text = "Убрать освещение";
+            }
+            else if (GL1.lightVis == 1)
+            {
+                GL1.lightVis = 0;
+                but_light.Text = "Отобразить освещение";
+            }
+        }
+
         private void imageBox1_Move(object sender, MouseEventArgs e)
         {
             var cont = (Control)sender;
@@ -134,25 +142,40 @@ namespace FaceAnalyse
             GL1.MouseLoc.y = 1 - (float)e.Y / (float)cont.Height;
         }
 
-        void detectingFace(Mat mat_face)
+        Point3d_GL[][] find3DPointsFromTex(PointF[][] points, Model3d model)
         {
+            var landm = new List<Point3d_GL[]>();
+            for(int i=0; i<points.Length; i++)
+            {
+                var p3d = new List<Point3d_GL>();
+                for (int j = 0; j < points[i].Length; j++)
+                {
+                    p3d.Add(model.take3dfrom2d(points[i][j]));
+                }
+                landm.Add(p3d.ToArray());
+            }
+            return landm.ToArray();
+        }
 
-            //var recog = FaceRecognitionDotNet.FaceRecognition.Create(_face);
+        PointF[][] detectingFace(Mat mat_face)
+        {
             var imface = faceImageFromMat(mat_face);
-
-            var param = new ModelParameter();
             var fr = FaceRecognition.Create(@"dlib_models");
-            var locs =  fr.FaceLocations(imface).ToArray();
-
+            var locs =  fr.FaceLocations(imface).ToArray();            
             var lands = fr.FaceLandmark(imface).ToArray();
+            var landm = new List<PointF[]>();
             for(int i=0; i<locs.Length;i++)
             {
-                //locs[i].
-                  CvInvoke.Rectangle(mat_face, new Rectangle(locs[i].Left, locs[i].Top, locs[i].Right- locs[i].Left, locs[i].Bottom), new MCvScalar(255, 0, 0),2);
+                CvInvoke.Rectangle(mat_face, new System.Drawing.Rectangle(locs[i].Left, locs[i].Top, locs[i].Right- locs[i].Left, locs[i].Bottom), new MCvScalar(255, 0, 0),2);                
                 
-               
                 foreach (FacePart face_tp in Enum.GetValues(typeof(FacePart)))
                 {
+                    var psLand = new List<PointF>();
+                    var color = new MCvScalar(0, 0, 255);
+                    if(face_tp == FacePart.LeftEye)
+                    {
+                        color = new MCvScalar(255, 0, 0);
+                    }
                     var points = new List<FacePoint>();
                     var en = points.AsEnumerable();
                     lands[i].TryGetValue(face_tp, out en);
@@ -161,57 +184,19 @@ namespace FaceAnalyse
                         var ps = en.ToArray();
                         for (int j = 0; j < ps.Length; j++)
                         {
-                            CvInvoke.Circle(mat_face, new System.Drawing.Point(ps[j].Point.X, ps[j].Point.Y), 2, new MCvScalar(0, 0, 255), 2);
+                            var pf = new System.Drawing.Point(ps[j].Point.X, ps[j].Point.Y);
+                            CvInvoke.Circle(mat_face, pf, 2, color, 2);
+                            psLand.Add(new PointF(ps[j].Point.X, ps[j].Point.Y));
                         }
-                    }
-                    
-                }
-                    
+                        landm.Add(psLand.ToArray());
+                    }                    
+                }                    
             }
-
-            CvInvoke.Imshow("sdf", mat_face);
-
+            return landm.ToArray();
         }
         FaceRecognitionDotNet.Image faceImageFromMat(Mat mat)
         {
             return FaceRecognition.LoadImage(mat.ToBitmap());
-            /*if (mat.NumberOfChannels==1)
-            {
-                var matData = (byte[,])mat.GetData();
-                var imData = new byte[matData.GetLength(0) * matData.GetLength(1)];
-                int w = matData.GetLength(0);
-                int h = matData.GetLength(1);
-                for (int j=0; j< h;j++)
-                {
-                    for (int i = 0; i < w; i++)
-                    {
-                        imData[j * w + i] = matData[i, j];
-                    }
-                }
-                
-            }
-            else if (mat.NumberOfChannels == 3)
-            {
-                var matData = (byte[,,])mat.GetData();
-                var imData = new byte[matData.GetLength(0) * matData.GetLength(1) * 3];
-                int w = matData.GetLength(0);
-                int h = matData.GetLength(1);
-                for (int j = 0; j < h; j++)
-                {
-                    for (int i = 0; i < w; i++)
-                    {
-
-                        imData[j * w + 3*i] = matData[i, j,0];
-                        imData[j * w + 3 * i + 1] = matData[i, j, 1];
-                        imData[j * w + 3 * i + 2] = matData[i, j, 2];
-                    }
-                }
-                return FaceRecognitionDotNet.FaceRecognition.LoadImage(imData, h, w, 3);
-            }
-            else
-            {
-                return null;
-            }*/
         }
 
         private void glControl1_ContextDestroying(object sender, GlControlEventArgs e)

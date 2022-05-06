@@ -40,6 +40,7 @@ namespace FaceAnalyse
             this.but_textureVision = new System.Windows.Forms.Button();
             this.imageBox1 = new Emgu.CV.UI.ImageBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.but_light = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_X_L)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Y_L)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Z_L)).BeginInit();
@@ -131,11 +132,22 @@ namespace FaceAnalyse
             this.richTextBox1.TabIndex = 7;
             this.richTextBox1.Text = "";
             // 
+            // but_light
+            // 
+            this.but_light.Location = new System.Drawing.Point(1139, 12);
+            this.but_light.Name = "but_light";
+            this.but_light.Size = new System.Drawing.Size(115, 43);
+            this.but_light.TabIndex = 8;
+            this.but_light.Text = "Убрать освещение";
+            this.but_light.UseVisualStyleBackColor = true;
+            this.but_light.Click += new System.EventHandler(this.but_light_Vision_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1904, 1041);
+            this.Controls.Add(this.but_light);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.imageBox1);
             this.Controls.Add(this.but_textureVision);
@@ -165,6 +177,7 @@ namespace FaceAnalyse
         private System.Windows.Forms.Button but_textureVision;
         private Emgu.CV.UI.ImageBox imageBox1;
         private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.Button but_light;
     }
 }
 

@@ -11,7 +11,7 @@ namespace Model
     {
         public Point3d_GL p;
         public Point3d_GL n;
-        public Geometry.PointF t;
+        public PointF t;
         public VertexGl(Point3d_GL _p, Point3d_GL _n, PointF _t)
         {
             p = _p;
@@ -21,7 +21,7 @@ namespace Model
     }
     public struct TriangleGl
     {
-        VertexGl v1;
+        public VertexGl v1;
         VertexGl v2;
         VertexGl v3;
         public TriangleGl(VertexGl _v1, VertexGl _v2, VertexGl _v3)
@@ -30,11 +30,11 @@ namespace Model
             v2 = _v2;
             v3 = _v3;
         }
-        public bool affilationPoint(VertexGl _p)
+        public bool affilationPoint(PointF _p)
         {
             float m, l;
-            var p = _p;
-            var P = _p.t - v1.t;
+            //var p = _p;
+            var P = _p - v1.t;
             var B = v2.t - v1.t;
             var C = v3.t - v1.t;
             m = (P.X * B.Y - B.X * P.Y) / (C.X * B.Y - B.X * C.Y);

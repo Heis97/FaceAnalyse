@@ -118,6 +118,7 @@ namespace Graphic
         public int LocationM;
         public int LightID;
         public int textureVisID;
+        public int lightVisID;
         public int LightPowerID;
         public int MaterialDiffuseID;
         public int MaterialAmbientID;
@@ -142,6 +143,7 @@ namespace Graphic
 
         int currentMonitor = 1;
 
+        public int lightVis = 0;
         public int textureVis = 0;
         float LightPower = 500000.0f;
         Label Label_cor;
@@ -408,7 +410,10 @@ namespace Graphic
             ids.MaterialSpecularID = Gl.GetUniformLocation(ids.programID, "MaterialSpecular");
             ids.LightID = Gl.GetUniformLocation(ids.programID, "LightPosition_world");
             ids.LightPowerID = Gl.GetUniformLocation(ids.programID, "lightPower");
+
             ids.textureVisID = Gl.GetUniformLocation(ids.programID, "textureVis");
+            ids.lightVisID = Gl.GetUniformLocation(ids.programID, "lightVis");
+
             ids.MouseLocID = Gl.GetUniformLocation(ids.programID, "MouseLoc");
             ids.MouseLocGLID = Gl.GetUniformLocation(ids.programID, "MouseLocGL");
 
@@ -442,7 +447,9 @@ namespace Graphic
             Gl.Uniform2f(ids.MouseLocGLID, 1, MouseLocGL);
 
             useTexture((uint)ids.TextureID);
+
             Gl.Uniform1i(ids.textureVisID, 1, textureVis);
+            Gl.Uniform1i(ids.lightVisID, 1, lightVis);
         }
 
         #region texture

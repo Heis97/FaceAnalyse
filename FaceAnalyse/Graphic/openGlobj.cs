@@ -20,6 +20,7 @@ namespace Graphic
         public PrimitiveType tp;
         public AnimType animType;
         public int id;
+        public int Textureid;
         public bool visible;
         uint buff_array;
 
@@ -28,7 +29,7 @@ namespace Graphic
 
 
 
-        public openGlobj(float[] v_buf, float[] c_buf, float[] n_buf, float[] t_buf, PrimitiveType type, int _id= -1,int _count=1)
+        public openGlobj(float[] v_buf, float[] c_buf, float[] n_buf, float[] t_buf, PrimitiveType type, int _id= -1,int _count=1,int textureId=-1)
         {
             vertex_buffer_data = new float[v_buf.Length];
             normal_buffer_data = new float[n_buf.Length];
@@ -62,7 +63,7 @@ namespace Graphic
             vert_len =(int) v_buf.Length / 3;
             v_buf.CopyTo(vertex_buffer_data, 0);       
             n_buf.CopyTo(normal_buffer_data, 0);
-            
+            Textureid = textureId;
             tp = type;
             visible = true;
             id = _id;

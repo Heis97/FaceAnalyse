@@ -341,9 +341,6 @@ namespace Graphic
 
             // Gl.Enable(EnableCap.CullFace);
             Gl.Enable(EnableCap.DepthTest);
-            textureB = textureLoad(pict);
-            idsTsOne.TextureID = (int)bindTexture(textureB);
-
 
         }
 
@@ -446,7 +443,11 @@ namespace Graphic
             Gl.Uniform2f(ids.MouseLocGLID, 1, MouseLocGL);
             Gl.Uniform2f(ids.MouseLocGLID, 1, MouseLocGL);
 
-            useTexture((uint)ids.TextureID);
+            if(openGlobj.Textureid>0)
+            {
+                useTexture((uint)openGlobj.Textureid);
+            }
+            
 
             Gl.Uniform1i(ids.textureVisID, 1, textureVis);
             Gl.Uniform1i(ids.lightVisID, 1, lightVis);
@@ -1019,10 +1020,18 @@ namespace Graphic
             return buffersGl.add_obj(glObj.setBuffers());
         }
 
-        public int addOBJ(float[] data_v, float[] data_n, float[] data_t, float scale = 1, int count = 1)
+        public int addOBJ(float[] data_v, float[] data_n, float[] data_t, float scale = 1, int count = 1, Mat pic = null)
         {
-            var glObj = new openGlobj(data_v, null, data_n, data_t, PrimitiveType.Triangles, 1, count);
+            var texid = -1;
+            if(pic!=null)
+            {
+                var textureB = textureLoad(pic);
+                texid = (int)bindTexture(textureB);
+            }
+            
 
+            var glObj = new openGlobj(data_v, null, data_n, data_t, PrimitiveType.Triangles, 1, count, texid);
+            
             glObj.trsc[0].scale = scale;
             glObj.trsc[0].transl = new Point3d_GL(0,0,0);
             glObj.trsc[0].rotate = new Point3d_GL(0, 0, 0);

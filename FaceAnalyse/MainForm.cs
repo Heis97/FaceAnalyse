@@ -34,7 +34,20 @@ namespace FaceAnalyse
         {
             var model = new Model3d(@"faces/Model.obj");
             var cube2 = new Model3d(@"faces/cube2.obj");
-            GL1.addOBJ(model.mesh, model.normale, model.texture,0.01f);
+            var pict = new Mat(@"faces/Model.jpg");
+            var pict2 = new Mat(@"faces/cube1.png");
+            CvInvoke.Resize(pict, pict, new System.Drawing.Size(800, 800));
+            //CvInvoke.Resize(pict, pict, new Size(3900, 3400));
+            var psL = detectingFace(pict);
+            var psL3D = find3DPointsFromTex(psL, model);
+            
+            for(int i=0; i<psL3D.Length;i++)
+            {
+                GL1.addMeshWithoutNorm(GL1.scaleMesh( Point3d_GL.toMesh(psL3D[i]),0.01f), PrimitiveType.Points);
+            }
+            
+            imageBox1.Image = pict;
+            GL1.addOBJ(model.mesh, model.normale, model.texture,0.01f,1, pict);
 
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(10, 0, 0), new Point3d_GL(0, 10, 0), new Point3d_GL(0, 0, 10));
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(-10, 0, 0), new Point3d_GL(0, -10, 0), new Point3d_GL(0, 0, -10));
@@ -43,12 +56,6 @@ namespace FaceAnalyse
         #region gl_control
         private void glControl1_ContextCreated(object sender, GlControlEventArgs e)
         {
-            var pict = new Mat(@"faces/Model.jpg");
-            //CvInvoke.Resize(pict, pict, new Size(3900, 3400));
-            CvInvoke.Resize(pict, pict, new System.Drawing.Size(800, 800));
-            GL1.pict = pict;
-            detectingFace(pict);
-            imageBox1.Image = pict;
             GL1.glControl_ContextCreated(sender, e);
             var send = (Control)sender;
             var w = send.Width;
@@ -150,7 +157,10 @@ namespace FaceAnalyse
                 var p3d = new List<Point3d_GL>();
                 for (int j = 0; j < points[i].Length; j++)
                 {
-                    p3d.Add(model.take3dfrom2d(points[i][j]));
+                    //Console.WriteLine(points[i][j]);
+                    var p3 = model.take3dfrom2d(points[i][j]);
+                    //Console.WriteLine(p3);
+                    p3d.Add(p3);
                 }
                 landm.Add(p3d.ToArray());
             }
@@ -186,7 +196,7 @@ namespace FaceAnalyse
                         {
                             var pf = new System.Drawing.Point(ps[j].Point.X, ps[j].Point.Y);
                             CvInvoke.Circle(mat_face, pf, 2, color, 2);
-                            psLand.Add(new PointF(ps[j].Point.X, ps[j].Point.Y));
+                            psLand.Add(new PointF(ps[j].Point.X/ (float)mat_face.Width, ps[j].Point.Y / (float)mat_face.Height));
                         }
                         landm.Add(psLand.ToArray());
                     }                    

@@ -1,4 +1,4 @@
-﻿#version 460 core
+﻿#version 430 core
 uniform vec3 LightPosition_world;
 uniform vec3 MaterialDiffuse;
 uniform vec3 MaterialAmbient;
@@ -54,6 +54,6 @@ void main() {
 		color.xyz = MaterialDiffuseColor;
 	}
 
-
+	color.xyz += fs_in.Color;
 
 }

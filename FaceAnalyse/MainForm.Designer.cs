@@ -57,7 +57,7 @@ namespace FaceAnalyse
             this.glControl1.Location = new System.Drawing.Point(12, 12);
             this.glControl1.MultisampleBits = ((uint)(8u));
             this.glControl1.Name = "glControl1";
-            this.glControl1.Size = new System.Drawing.Size(1000, 1000);
+            this.glControl1.Size = new System.Drawing.Size(700, 700);
             this.glControl1.StencilBits = ((uint)(0u));
             this.glControl1.TabIndex = 0;
             this.glControl1.ContextCreated += new System.EventHandler<OpenGL.GlControlEventArgs>(this.glControl1_ContextCreated);
@@ -76,7 +76,7 @@ namespace FaceAnalyse
             // 
             // trackBar_X_L
             // 
-            this.trackBar_X_L.Location = new System.Drawing.Point(1347, 10);
+            this.trackBar_X_L.Location = new System.Drawing.Point(1067, 12);
             this.trackBar_X_L.Maximum = 100;
             this.trackBar_X_L.Minimum = -100;
             this.trackBar_X_L.Name = "trackBar_X_L";
@@ -86,7 +86,7 @@ namespace FaceAnalyse
             // 
             // trackBar_Y_L
             // 
-            this.trackBar_Y_L.Location = new System.Drawing.Point(1347, 61);
+            this.trackBar_Y_L.Location = new System.Drawing.Point(1067, 57);
             this.trackBar_Y_L.Maximum = 100;
             this.trackBar_Y_L.Minimum = -100;
             this.trackBar_Y_L.Name = "trackBar_Y_L";
@@ -96,7 +96,7 @@ namespace FaceAnalyse
             // 
             // trackBar_Z_L
             // 
-            this.trackBar_Z_L.Location = new System.Drawing.Point(1347, 112);
+            this.trackBar_Z_L.Location = new System.Drawing.Point(1067, 108);
             this.trackBar_Z_L.Maximum = 100;
             this.trackBar_Z_L.Minimum = -100;
             this.trackBar_Z_L.Name = "trackBar_Z_L";
@@ -107,7 +107,7 @@ namespace FaceAnalyse
             // 
             // but_textureVision
             // 
-            this.but_textureVision.Location = new System.Drawing.Point(1018, 12);
+            this.but_textureVision.Location = new System.Drawing.Point(737, 163);
             this.but_textureVision.Name = "but_textureVision";
             this.but_textureVision.Size = new System.Drawing.Size(115, 43);
             this.but_textureVision.TabIndex = 6;
@@ -117,16 +117,16 @@ namespace FaceAnalyse
             // 
             // imageBox1
             // 
-            this.imageBox1.Location = new System.Drawing.Point(1018, 219);
+            this.imageBox1.Location = new System.Drawing.Point(858, 163);
             this.imageBox1.Name = "imageBox1";
-            this.imageBox1.Size = new System.Drawing.Size(800, 800);
+            this.imageBox1.Size = new System.Drawing.Size(500, 500);
             this.imageBox1.TabIndex = 2;
             this.imageBox1.TabStop = false;
             this.imageBox1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.imageBox1_Move);
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(1019, 61);
+            this.richTextBox1.Location = new System.Drawing.Point(739, 5);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.Size = new System.Drawing.Size(322, 152);
             this.richTextBox1.TabIndex = 7;
@@ -134,7 +134,7 @@ namespace FaceAnalyse
             // 
             // but_light
             // 
-            this.but_light.Location = new System.Drawing.Point(1139, 12);
+            this.but_light.Location = new System.Drawing.Point(737, 212);
             this.but_light.Name = "but_light";
             this.but_light.Size = new System.Drawing.Size(115, 43);
             this.but_light.TabIndex = 8;
@@ -146,7 +146,7 @@ namespace FaceAnalyse
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1904, 1041);
+            this.ClientSize = new System.Drawing.Size(1370, 749);
             this.Controls.Add(this.but_light);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.imageBox1);

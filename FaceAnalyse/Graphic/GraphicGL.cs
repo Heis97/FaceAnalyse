@@ -781,8 +781,9 @@ namespace Graphic
                     }
                     else if (e.Button == MouseButtons.Right)
                     {
-                        trz.off_x += Convert.ToDouble(dx);
-                        trz.off_y += Convert.ToDouble(dy);
+                        var flow_mul = 0.1;
+                        trz.off_x += flow_mul* Convert.ToDouble(dx);
+                        trz.off_y += flow_mul * Convert.ToDouble(dy);
                     }
                     lastPos = e.Location;
                     break;

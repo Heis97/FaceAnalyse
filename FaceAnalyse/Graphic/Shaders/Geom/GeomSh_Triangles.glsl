@@ -1,4 +1,4 @@
-﻿#version 460 core
+﻿#version 430 core
 layout (triangles, invocations = 1) in;
 layout (triangle_strip, max_vertices = 3) out;
 uniform vec3 LightPosition_world;
@@ -26,8 +26,32 @@ vec3 LightDirection_camera;
 vec2 TextureUV;
 } fs_in;
 
+bool checkPointInTriangle(vec2 _A,vec2 _B,vec2 _C,vec2 _P)
+{
+	vec2 P = _P - _A;
+	vec2 B = _B - _A;
+	vec2 C = _C - _A;
+	float m = (P.x * B.y - B.x * P.y) / (C.x * B.y - B.x * C.y);
+	if(m>=0 && m<=1)
+    {
+        float l = (P.x - m * C.x) / B.x;
+        if (l >= 0 && (m+l) <= 1)
+        {
+            return (true);
+        }
+    }
+    return(false);
+}
+
 void main() 
 {
+	bool selected_triangle = checkPointInTriangle(
+	vs_out[0].vertexTexture,
+	vs_out[1].vertexTexture,
+	vs_out[2].vertexTexture,
+	MouseLoc);
+
+
    for (int i = 0; i < gl_in.length(); i++)
    { 
 	    gl_ViewportIndex = gl_InvocationID;
@@ -41,6 +65,10 @@ void main()
 	    fs_in.Normal_camera = ( Vs[gl_InvocationID] * vec4(vs_out[i].vertexNormal_world, 1.0)).xyz;
 	    fs_in.Color = vs_out[i].vertexColor;
 		fs_in.TextureUV = vs_out[i].vertexTexture;
+		if(selected_triangle)
+		{
+		    fs_in.Color = vec3(0,1,0);
+		}
 	    EmitVertex();
 	}
 }

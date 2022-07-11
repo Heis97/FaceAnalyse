@@ -15,13 +15,14 @@ using Graphic;
 using Model;
 using Geometry;
 using FaceRecognitionDotNet;
+using FaceAnalyse;
 
 namespace FaceAnalyse
 {
     public partial class MainForm : Form
     {
         private GraphicGL GL1 = new GraphicGL();
-        
+
         public MainForm()
         {
             InitializeComponent();
@@ -32,26 +33,27 @@ namespace FaceAnalyse
         }
         void Init()
         {
-            var model = new Model3d(@"faces/Model.obj");
-            var cube2 = new Model3d(@"faces/cube2.obj");
-            var pict = new Mat(@"faces/Model.jpg");
-            var pict2 = new Mat(@"faces/cube1.png");
-            CvInvoke.Resize(pict, pict, new System.Drawing.Size(800, 800));
-            //CvInvoke.Resize(pict, pict, new Size(3900, 3400));
-            var psL = detectingFace(pict);
-            var psL3D = find3DPointsFromTex(psL, model);
-            
-            for(int i=0; i<psL3D.Length;i++)
-            {
-                GL1.addMeshWithoutNorm(GL1.scaleMesh( Point3d_GL.toMesh(psL3D[i]),0.01f), PrimitiveType.Points);
-            }
-            
+            var model = new Model3d(@"faces/Archive/25/25.2/Model.obj", false);
+            //var cube2 = new Model3d(@"faces/cube2.obj");
+            var pict = new Mat(@"faces/Archive/25/25.2/Model.jpg");
+            //var pict2 = new Mat(@"faces/cube1.png");
+            CvInvoke.Resize(pict, pict, new System.Drawing.Size(1500, 1500));
+
+            var face = setPointsModel(detectingFace(pict), model);
+            var ps = face.getPoints3d();
+            Console.WriteLine("psL3D.Length " + ps.Length);
+            GL1.addMeshWithoutNorm(GL1.scaleMesh( Point3d_GL.toMesh(ps),0.01f), PrimitiveType.Points);
+            GL1.addMeshWithoutNorm(GL1.scaleMesh(Point3d_GL.toMesh(face.centerEye.ToArray()), 0.01f), PrimitiveType.Lines,0.9f);
+
+
             imageBox1.Image = pict;
             GL1.addOBJ(model.mesh, model.normale, model.texture,0.01f,1, pict);
 
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(10, 0, 0), new Point3d_GL(0, 10, 0), new Point3d_GL(0, 0, 10));
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(-10, 0, 0), new Point3d_GL(0, -10, 0), new Point3d_GL(0, 0, -10));
         }
+
+
 
         #region gl_control
         private void glControl1_ContextCreated(object sender, GlControlEventArgs e)
@@ -149,7 +151,21 @@ namespace FaceAnalyse
             GL1.MouseLoc.y = 1 - (float)e.Y / (float)cont.Height;
         }
 
-        Point3d_GL[][] find3DPointsFromTex(PointF[][] points, Model3d model)
+        Face3d setPointsModel(Face3d[] faces,Model3d model)
+        {
+            var ps3d_l = new List<Point3d_GL>();
+            for(int i = 0; i < faces.Length; i++)
+            {
+                faces[i].setPoints3dFromModel(model);
+                ps3d_l.AddRange(faces[i].getPoints3d());
+            }
+            return Face3d.joinFaces3d(faces);
+        }
+
+        Point3d_GL[][] find3DPointsFromTex(
+            PointF[][] points,
+            Model3d model
+            )
         {
             var landm = new List<Point3d_GL[]>();
             for(int i=0; i<points.Length; i++)
@@ -157,9 +173,8 @@ namespace FaceAnalyse
                 var p3d = new List<Point3d_GL>();
                 for (int j = 0; j < points[i].Length; j++)
                 {
-                    //Console.WriteLine(points[i][j]);
-                    var p3 = model.take3dfrom2d(points[i][j]);
-                    //Console.WriteLine(p3);
+                    var p2d = new PointF(points[i][j].X, 1-points[i][j].Y);
+                    var p3 = model.take3dfrom2d(p2d);
                     p3d.Add(p3);
                 }
                 landm.Add(p3d.ToArray());
@@ -167,20 +182,20 @@ namespace FaceAnalyse
             return landm.ToArray();
         }
 
-        PointF[][] detectingFace(Mat mat_face)
+        Face3d[] detectingFace(Mat mat_face)
         {
             var imface = faceImageFromMat(mat_face);
             var fr = FaceRecognition.Create(@"dlib_models");
             var locs =  fr.FaceLocations(imface).ToArray();            
             var lands = fr.FaceLandmark(imface).ToArray();
-            var landm = new List<PointF[]>();
-            for(int i=0; i<locs.Length;i++)
+            var faces = new List<Face3d>();
+            for (int i=0; i<locs.Length;i++)
             {
-                CvInvoke.Rectangle(mat_face, new System.Drawing.Rectangle(locs[i].Left, locs[i].Top, locs[i].Right- locs[i].Left, locs[i].Bottom), new MCvScalar(255, 0, 0),2);                
-                
+                //CvInvoke.Rectangle(mat_face, new System.Drawing.Rectangle(locs[i].Left, locs[i].Top, locs[i].Right- locs[i].Left, locs[i].Bottom), new MCvScalar(255, 0, 0),2);                
+                var parts = new List<FacePart3d>();
                 foreach (FacePart face_tp in Enum.GetValues(typeof(FacePart)))
                 {
-                    var psLand = new List<PointF>();
+                    var ps_norm = new List<PointF>();
                     var color = new MCvScalar(0, 0, 255);
                     if(face_tp == FacePart.LeftEye)
                     {
@@ -195,15 +210,30 @@ namespace FaceAnalyse
                         for (int j = 0; j < ps.Length; j++)
                         {
                             var pf = new System.Drawing.Point(ps[j].Point.X, ps[j].Point.Y);
-                            CvInvoke.Circle(mat_face, pf, 2, color, 2);
-                            psLand.Add(new PointF(ps[j].Point.X/ (float)mat_face.Width, ps[j].Point.Y / (float)mat_face.Height));
+                            //CvInvoke.Circle(mat_face, pf, 0, color, 2);
+                            CvInvoke.DrawMarker(mat_face, pf, new MCvScalar(0, 255, 255), MarkerTypes.Cross);
+                            CvInvoke.PutText(mat_face, j.ToString(),new System.Drawing.Point( pf.X+10, pf.Y - 10), FontFace.HersheyPlain, 1, new MCvScalar(0, 255, 255));
+                            ps_norm.Add(new PointF(ps[j].Point.X/ (float)mat_face.Width, ps[j].Point.Y / (float)mat_face.Height));
                         }
-                        landm.Add(psLand.ToArray());
-                    }                    
-                }                    
+                        parts.Add(new FacePart3d(face_tp, ps_norm.ToArray()));
+                    }
+                    
+                }
+                faces.Add(new Face3d(parts.ToArray()));
             }
-            return landm.ToArray();
+            return faces.ToArray();
         }
+
+        PointF[] pointsFromFacePoins(FacePoint[] fps)
+        {
+            PointF[] points = new PointF[fps.Length];
+            for(int i=0; i<points.Length;i++)
+            {
+                points[i] =new PointF(fps[i].Point.X, fps[i].Point.Y);
+            }
+            return points;
+        }
+
         FaceRecognitionDotNet.Image faceImageFromMat(Mat mat)
         {
             return FaceRecognition.LoadImage(mat.ToBitmap());

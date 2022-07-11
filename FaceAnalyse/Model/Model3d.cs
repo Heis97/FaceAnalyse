@@ -355,7 +355,8 @@ namespace Model
                 textureldata[i_vt] = texture[face_vt[i][0] - 1][0]; i_vt++;
                 textureldata[i_vt] = texture[face_vt[i][0] - 1][1]; i_vt++;
 
-                var v1 = new VertexGl(new Point3d_GL(vertexdata[i_v - 3], vertexdata[i_v - 2], vertexdata[i_v - 1]),
+                var v1 = new VertexGl(
+                    new Point3d_GL(vertexdata[i_v - 3], vertexdata[i_v - 2], vertexdata[i_v - 1]),
                     new Point3d_GL(normaldata[i_vn - 3], normaldata[i_vn - 2], normaldata[i_vn - 1]),
                     new PointF(textureldata[i_vt - 2], textureldata[i_vt - 1]));
                 //--------------------------------------------------------------
@@ -371,7 +372,8 @@ namespace Model
                 textureldata[i_vt] = texture[face_vt[i][1] - 1][0]; i_vt++;
                 textureldata[i_vt] = texture[face_vt[i][1] - 1][1]; i_vt++;
 
-                var v2 = new VertexGl(new Point3d_GL(vertexdata[i_v - 3], vertexdata[i_v - 2], vertexdata[i_v - 1]),
+                var v2 = new VertexGl(
+                    new Point3d_GL(vertexdata[i_v - 3], vertexdata[i_v - 2], vertexdata[i_v - 1]),
                     new Point3d_GL(normaldata[i_vn - 3], normaldata[i_vn - 2], normaldata[i_vn - 1]),
                     new PointF(textureldata[i_vt - 2], textureldata[i_vt - 1]));
                 //--------------------------------------------------------------

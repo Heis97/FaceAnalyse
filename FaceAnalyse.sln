@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32228.343
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceAnalyse", "FaceAnalyse\FaceAnalyse.csproj", "{1B390E3A-A3B5-4519-AB4E-E0B228E959F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenGL.Net.Math_net461", "..\OpenGL.Net-master\OpenGL.Net\OpenGL.Net.Math_net461.csproj", "{05DFBC0C-AFBC-4ED0-BF43-80D7BB4E8DFD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenGL.Net.Math_net461", "..\OpenGL.Net.Math_net461\OpenGL.Net.Math_net461.csproj", "{05DFBC0C-AFBC-4ED0-BF43-80D7BB4E8DFD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

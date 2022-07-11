@@ -1,4 +1,4 @@
-﻿#version 460 
+﻿#version 430 
 layout (lines, invocations = 1) in;
 layout (line_strip, max_vertices = 6) out;
 

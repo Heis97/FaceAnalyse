@@ -14,6 +14,7 @@ namespace FaceAnalyse
         FacePart3d[] parts;
         Point3d_GL[] ps3d;
         public List<Point3d_GL> centerEye;
+
         public Face3d(FacePart3d[] _parts)
         {
             parts = _parts;
@@ -22,6 +23,10 @@ namespace FaceAnalyse
 
         static public Face3d joinFaces3d(Face3d[] faces)
         {
+            if(faces.Length==1)
+            {
+                return faces[0];
+            }
             var face_b = findBestFace(faces);
             face_b.centerEye = new List<Point3d_GL>();
            // var face_b = faces[3];
@@ -76,8 +81,7 @@ namespace FaceAnalyse
                 if(inds[i] > val_max)
                 {
                     val_max = inds[i];
-                    ind_max = i;
-                    
+                    ind_max = i;                    
                 }
             }
             Console.WriteLine("ind_max: " + ind_max);
@@ -96,6 +100,21 @@ namespace FaceAnalyse
             }
             return p3d.ToArray();
         }
+
+        static Point3d_GL[] find3DPointsFromGl(PointF[] points, Model3d model)
+        {
+            var p3d = new List<Point3d_GL>();
+            for (int j = 0; j < points.Length; j++)
+            {
+                var p2d = new PointF(points[j].X, points[j].Y);
+                var p3 = model.take3dfrom2d(p2d);
+                //Console.WriteLine(points[j] + " " + p2d + " " + p3);
+                p3d.Add(p3);
+            }
+            return p3d.ToArray();
+        }
+
+
         public Point3d_GL[] getPoints3d()
         {
             var ps3d_list = new List<Point3d_GL>();
@@ -113,17 +132,16 @@ namespace FaceAnalyse
         }
 
 
-        public void setPoints3dFromModel(Model3d model)
+        public void setPoints3dFromModel(Model3d model,bool from_gl = false)
         {
             var ps3d_list = new List<Point3d_GL>();
             for(int i=0; i < parts.Length; i++)
             {
+
                 var ps3d_cur = find3DPointsFromTex(parts[i].ps2d, model);
+
                 parts[i].ps3d = ps3d_cur;
                 ps3d_list.AddRange(ps3d_cur);
-
-                
-
             }
             ps3d = ps3d_list.ToArray();
         }
@@ -152,10 +170,7 @@ namespace FaceAnalyse
         {
             part_type = _part_type;
             ps2d = _ps2d;
-        }
-
-        
-       
+        }     
     }
     public class FaceAnalisyng
     {

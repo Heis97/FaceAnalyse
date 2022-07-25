@@ -264,7 +264,8 @@ namespace Graphic
             }
             else if (viewType_ == viewType.Ortho)
             {
-                var _Pm = Matrix4x4f.Ortho(-1, 1, -1, 1, 0.00001f, 10000f);
+                float window =4*(float) zoom;
+                var _Pm = Matrix4x4f.Ortho(-window, window, -window, window, 0.00001f, 10000f);
                 var _Vm = Matrix4x4f.Translated((float)off_x, -(float)off_y, (float)zoom * (float)off_z) *
                     Matrix4x4f.RotatedX((float)xRot) *
                     Matrix4x4f.RotatedY((float)yRot) *

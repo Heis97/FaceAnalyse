@@ -192,6 +192,10 @@ namespace Geometry
         {
             return new Point3d_GL(p.x + v1.x, p.y + v1.y, p.z + v1.z);
         }
+        public static double operator *(Point3d_GL p, Vector3d_GL v1)
+        {
+            return p.x * v1.x+ p.y * v1.y+p.z * v1.z;
+        }
         public static Point3d_GL operator +(Point3d_GL p1, Point3d_GL p2)
         {
             return new Point3d_GL(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z);

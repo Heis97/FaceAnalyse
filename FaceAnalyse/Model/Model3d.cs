@@ -484,6 +484,8 @@ namespace Model
             }
             return new Point3d_GL(0, 0, 0);
         }
+
+        
     }
 
 }

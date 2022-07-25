@@ -26,6 +26,13 @@ namespace Geometry
             y = a.y - b.y;
             z = a.z - b.z;
         }
+        public static Vector3d_GL operator |(Vector3d_GL p1, Vector3d_GL p2)//vector multiply
+        {
+            return new Vector3d_GL(
+                  p1.y * p2.z - p1.z * p2.y,
+                  p1.z * p2.x - p1.x * p2.z,
+                  p1.x * p2.y - p1.y * p2.x);
+        }
         public Vector3d_GL(Point p, double _z)
         {
             x = p.X;

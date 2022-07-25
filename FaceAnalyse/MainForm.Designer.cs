@@ -41,10 +41,15 @@ namespace FaceAnalyse
             this.imageBox1 = new Emgu.CV.UI.ImageBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.but_light = new System.Windows.Forms.Button();
+            this.but_prog_type = new System.Windows.Forms.Button();
+            this.but_xy_plane = new System.Windows.Forms.Button();
+            this.but_det_landmark = new System.Windows.Forms.Button();
+            this.imageBox2 = new Emgu.CV.UI.ImageBox();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_X_L)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Y_L)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Z_L)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBox2)).BeginInit();
             this.SuspendLayout();
             // 
             // glControl1
@@ -142,11 +147,53 @@ namespace FaceAnalyse
             this.but_light.UseVisualStyleBackColor = true;
             this.but_light.Click += new System.EventHandler(this.but_light_Vision_Click);
             // 
+            // but_prog_type
+            // 
+            this.but_prog_type.Location = new System.Drawing.Point(739, 261);
+            this.but_prog_type.Name = "but_prog_type";
+            this.but_prog_type.Size = new System.Drawing.Size(115, 43);
+            this.but_prog_type.TabIndex = 9;
+            this.but_prog_type.Text = "Персп/ортогр";
+            this.but_prog_type.UseVisualStyleBackColor = true;
+            this.but_prog_type.Click += new System.EventHandler(this.but_prog_type_Click);
+            // 
+            // but_xy_plane
+            // 
+            this.but_xy_plane.Location = new System.Drawing.Point(739, 310);
+            this.but_xy_plane.Name = "but_xy_plane";
+            this.but_xy_plane.Size = new System.Drawing.Size(115, 43);
+            this.but_xy_plane.TabIndex = 10;
+            this.but_xy_plane.Text = "XY";
+            this.but_xy_plane.UseVisualStyleBackColor = true;
+            this.but_xy_plane.Click += new System.EventHandler(this.but_xy_plane_Click);
+            // 
+            // but_det_landmark
+            // 
+            this.but_det_landmark.Location = new System.Drawing.Point(739, 359);
+            this.but_det_landmark.Name = "but_det_landmark";
+            this.but_det_landmark.Size = new System.Drawing.Size(115, 43);
+            this.but_det_landmark.TabIndex = 11;
+            this.but_det_landmark.Text = "Вычислить точки";
+            this.but_det_landmark.UseVisualStyleBackColor = true;
+            this.but_det_landmark.Click += new System.EventHandler(this.but_det_landmark_Click);
+            // 
+            // imageBox2
+            // 
+            this.imageBox2.Location = new System.Drawing.Point(561, 386);
+            this.imageBox2.Name = "imageBox2";
+            this.imageBox2.Size = new System.Drawing.Size(500, 500);
+            this.imageBox2.TabIndex = 12;
+            this.imageBox2.TabStop = false;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1370, 749);
+            this.Controls.Add(this.imageBox2);
+            this.Controls.Add(this.but_det_landmark);
+            this.Controls.Add(this.but_xy_plane);
+            this.Controls.Add(this.but_prog_type);
             this.Controls.Add(this.but_light);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.imageBox1);
@@ -162,6 +209,7 @@ namespace FaceAnalyse
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Y_L)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Z_L)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBox2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -178,6 +226,10 @@ namespace FaceAnalyse
         private Emgu.CV.UI.ImageBox imageBox1;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Button but_light;
+        private System.Windows.Forms.Button but_prog_type;
+        private System.Windows.Forms.Button but_xy_plane;
+        private System.Windows.Forms.Button but_det_landmark;
+        private Emgu.CV.UI.ImageBox imageBox2;
     }
 }
 

@@ -918,6 +918,7 @@ namespace Graphic
 
         public void planeXY()
         {
+            currentMonitor = 0;
             var trz = transRotZooms[currentMonitor];
             trz.setRot(0, 0, 0);
             transRotZooms[currentMonitor] = trz;

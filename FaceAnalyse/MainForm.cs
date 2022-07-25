@@ -22,7 +22,7 @@ namespace FaceAnalyse
     public partial class MainForm : Form
     {
         private GraphicGL GL1 = new GraphicGL();
-
+        Model3d model;
         public MainForm()
         {
             InitializeComponent();
@@ -33,17 +33,13 @@ namespace FaceAnalyse
         }
         void Init()
         {
-            var model = new Model3d(@"faces/Archive/25/25.2/Model.obj", false);
+            model = new Model3d(@"faces/Archive/25/25.2/Model.obj", false);
             //var cube2 = new Model3d(@"faces/cube2.obj");
             var pict = new Mat(@"faces/Archive/25/25.2/Model.jpg");
             //var pict2 = new Mat(@"faces/cube1.png");
             CvInvoke.Resize(pict, pict, new System.Drawing.Size(1500, 1500));
 
-            var face = setPointsModel(detectingFace(pict), model);
-            var ps = face.getPoints3d();
-            Console.WriteLine("psL3D.Length " + ps.Length);
-            GL1.addMeshWithoutNorm(GL1.scaleMesh( Point3d_GL.toMesh(ps),0.01f), PrimitiveType.Points);
-            GL1.addMeshWithoutNorm(GL1.scaleMesh(Point3d_GL.toMesh(face.centerEye.ToArray()), 0.01f), PrimitiveType.Lines,0.9f);
+           
 
 
             imageBox1.Image = pict;
@@ -71,6 +67,9 @@ namespace FaceAnalyse
 
         private void glControl1_Render(object sender, GlControlEventArgs e)
         {
+            var mat1 = GL1.matFromMonitor(0);
+            CvInvoke.Flip(mat1,mat1,FlipType.Vertical);
+            imageBox1.Image = mat1;
             GL1.glControl_Render(sender, e);           
         }
 
@@ -151,12 +150,12 @@ namespace FaceAnalyse
             GL1.MouseLoc.y = 1 - (float)e.Y / (float)cont.Height;
         }
 
-        Face3d setPointsModel(Face3d[] faces,Model3d model)
+        Face3d setPointsModel(Face3d[] faces,Model3d model,bool from_gl = false)
         {
             var ps3d_l = new List<Point3d_GL>();
             for(int i = 0; i < faces.Length; i++)
             {
-                faces[i].setPoints3dFromModel(model);
+                faces[i].setPoints3dFromModel(model, from_gl);
                 ps3d_l.AddRange(faces[i].getPoints3d());
             }
             return Face3d.joinFaces3d(faces);
@@ -216,8 +215,7 @@ namespace FaceAnalyse
                             ps_norm.Add(new PointF(ps[j].Point.X/ (float)mat_face.Width, ps[j].Point.Y / (float)mat_face.Height));
                         }
                         parts.Add(new FacePart3d(face_tp, ps_norm.ToArray()));
-                    }
-                    
+                    }                    
                 }
                 faces.Add(new Face3d(parts.ToArray()));
             }
@@ -242,6 +240,27 @@ namespace FaceAnalyse
         private void glControl1_ContextDestroying(object sender, GlControlEventArgs e)
         {
             GL1.glControl_ContextDestroying(sender, e);
+        }
+
+        private void but_prog_type_Click(object sender, EventArgs e)
+        {
+            GL1.changeViewType(0);
+        }
+
+        private void but_xy_plane_Click(object sender, EventArgs e)
+        {
+            GL1.planeXY();
+        }
+
+        private void but_det_landmark_Click(object sender, EventArgs e)
+        {
+            var mat1 = (Mat)imageBox1.Image;
+            var face = setPointsModel(detectingFace(mat1), model,true);
+            imageBox2.Image = mat1;
+            var ps = face.getPoints3d();
+            Console.WriteLine("psL3D.Length " + ps.Length);
+            GL1.addMeshWithoutNorm(GL1.scaleMesh(Point3d_GL.toMesh(ps), 0.01f), PrimitiveType.Points);
+            GL1.addMeshWithoutNorm(GL1.scaleMesh(Point3d_GL.toMesh(face.centerEye.ToArray()), 0.01f), PrimitiveType.Lines, 0.9f);
         }
     }
 }

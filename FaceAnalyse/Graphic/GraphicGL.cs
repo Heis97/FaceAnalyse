@@ -774,7 +774,7 @@ namespace Graphic
                     }
                     if (e.Button == MouseButtons.Left)
                     {
-                        trz.xRot -= dy;
+                        trz.xRot += dy;
                         trz.yRot += dx;
                         //trz.zRot += dz;
                         
@@ -838,19 +838,15 @@ namespace Graphic
             var angle = e.Delta;
             if (angle > 0)
             {
-                if (trz.zoom < 0.0002)
-                {
-                }
-                else
-                {
+                
                     trz.zoom = 0.7 * trz.zoom;
-                    trz.zoom = Math.Round(trz.zoom, 4);
-                }
+                    //trz.zoom = Math.Round(trz.zoom, 4);
+                
             }
             else
             {
                 trz.zoom = 1.3 * trz.zoom;
-                trz.zoom = Math.Round(trz.zoom, 4);
+                //trz.zoom = Math.Round(trz.zoom, 4);
             }
             transRotZooms[sel_trz] = trz;
         }
@@ -1030,8 +1026,6 @@ namespace Graphic
                 var textureB = textureLoad(pic);
                 texid = (int)bindTexture(textureB);
             }
-            
-
             var glObj = new openGlobj(data_v, null, data_n, data_t, PrimitiveType.Triangles, 1, count, texid);
             
             glObj.trsc[0].scale = scale;
@@ -1080,6 +1074,21 @@ namespace Graphic
             }
             return mesh;
         }
+
+        static public float[] translateMesh(float[] _mesh, Matrix<double> matrix)
+        {
+            var mesh = new float[_mesh.Length];
+            for (int i = 0; i < mesh.Length; i += 3)
+            {
+                var p = matrix* new Point3d_GL(_mesh[i], _mesh[i + 1], _mesh[i + 2]);
+
+                mesh[i] = (float)p.x;
+                mesh[i + 1] = (float)p.y;
+                mesh[i + 2] = (float)p.z;
+            }
+            return mesh;
+        }
+
         public float[] scaleMesh(float[] _mesh, float k, float kx = 1.0f, float ky = 1.0f, float kz = 1.0f)
         {
             var mesh = new float[_mesh.Length];

@@ -16,6 +16,7 @@ using Model;
 using Geometry;
 using FaceRecognitionDotNet;
 using FaceAnalyse;
+using System.Threading;
 
 namespace FaceAnalyse
 {
@@ -23,30 +24,33 @@ namespace FaceAnalyse
     {
         private GraphicGL GL1 = new GraphicGL();
         Model3d model;
+        Mat pict;
         public MainForm()
         {
             InitializeComponent();
             GL1.lightXscroll(trackBar_X_L.Value);
             GL1.lightYscroll(trackBar_Y_L.Value);
             GL1.lightZscroll(trackBar_Z_L.Value);
-            glControl1.MouseWheel += GL1.Form1_mousewheel; 
+            glControl1.MouseWheel += GL1.Form1_mousewheel;
+
+ 
+
         }
         void Init()
         {
-            model = new Model3d(@"faces/Archive/25/25.2/Model.obj", false);
+            model = new Model3d(@"faces/Archive/25/25.0/Model.obj", false);
+            
             //var cube2 = new Model3d(@"faces/cube2.obj");
-            var pict = new Mat(@"faces/Archive/25/25.2/Model.jpg");
+            pict = new Mat(@"faces/Archive/25/25.0/Model.jpg");
             //var pict2 = new Mat(@"faces/cube1.png");
             CvInvoke.Resize(pict, pict, new System.Drawing.Size(1500, 1500));
 
            
-
-
             imageBox1.Image = pict;
-            GL1.addOBJ(model.mesh, model.normale, model.texture,0.01f,1, pict);
 
-            GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(10, 0, 0), new Point3d_GL(0, 10, 0), new Point3d_GL(0, 0, 10));
-            GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(-10, 0, 0), new Point3d_GL(0, -10, 0), new Point3d_GL(0, 0, -10));
+            GL1.addOBJ(model.mesh,model.normale, model.texture, 1, 1, pict);
+            GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(1, 0, 0), new Point3d_GL(0, 1, 0), new Point3d_GL(0, 0, 1));
+            GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(-1, 0, 0), new Point3d_GL(0, -1, 0), new Point3d_GL(0, 0, -1));
         }
 
 
@@ -155,7 +159,7 @@ namespace FaceAnalyse
             var ps3d_l = new List<Point3d_GL>();
             for(int i = 0; i < faces.Length; i++)
             {
-                faces[i].setPoints3dFromModel(model, from_gl);
+                faces[i].setPoints3dFromModel(model,  GL1.transRotZooms[0].zoom,from_gl);
                 ps3d_l.AddRange(faces[i].getPoints3d());
             }
             return Face3d.joinFaces3d(faces);
@@ -210,8 +214,8 @@ namespace FaceAnalyse
                         {
                             var pf = new System.Drawing.Point(ps[j].Point.X, ps[j].Point.Y);
                             //CvInvoke.Circle(mat_face, pf, 0, color, 2);
-                            CvInvoke.DrawMarker(mat_face, pf, new MCvScalar(0, 255, 255), MarkerTypes.Cross);
-                            CvInvoke.PutText(mat_face, j.ToString(),new System.Drawing.Point( pf.X+10, pf.Y - 10), FontFace.HersheyPlain, 1, new MCvScalar(0, 255, 255));
+                            CvInvoke.DrawMarker(mat_face, pf, new MCvScalar(0, 255, 255), MarkerTypes.Cross,6);
+                            CvInvoke.PutText(mat_face, j.ToString(),new System.Drawing.Point( pf.X+3, pf.Y - 3), FontFace.HersheyPlain, 1, new MCvScalar(0, 255, 255));
                             ps_norm.Add(new PointF(ps[j].Point.X/ (float)mat_face.Width, ps[j].Point.Y / (float)mat_face.Height));
                         }
                         parts.Add(new FacePart3d(face_tp, ps_norm.ToArray()));
@@ -251,16 +255,50 @@ namespace FaceAnalyse
         {
             GL1.planeXY();
         }
-
-        private void but_det_landmark_Click(object sender, EventArgs e)
+        async void det_landmark()
         {
+            var count = GL1.rendercout;
+            GL1.lightVis = 1;
+            GL1.textureVis = 1;
+            GL1.transRotZooms[0].viewType_ = viewType.Ortho;
+            await Task.Delay(100);
             var mat1 = (Mat)imageBox1.Image;
-            var face = setPointsModel(detectingFace(mat1), model,true);
+            var face = setPointsModel(detectingFace(mat1), model, true);
             imageBox2.Image = mat1;
             var ps = face.getPoints3d();
             Console.WriteLine("psL3D.Length " + ps.Length);
-            GL1.addMeshWithoutNorm(GL1.scaleMesh(Point3d_GL.toMesh(ps), 0.01f), PrimitiveType.Points);
-            GL1.addMeshWithoutNorm(GL1.scaleMesh(Point3d_GL.toMesh(face.centerEye.ToArray()), 0.01f), PrimitiveType.Lines, 0.9f);
+            GL1.buffersGl.removeObj(0);
+            var matr = face.get_matrix_eye_center();
+            GL1.addOBJ(GraphicGL.translateMesh(model.mesh, matr),
+                model.normale, model.texture, 1, 1, pict);
+            // GL1.addMesh(TriangleGl.get_mesh(model.triangles),PrimitiveType.Triangles);
+            GL1.addMeshWithoutNorm(GraphicGL.translateMesh(Point3d_GL.toMesh(ps), matr), PrimitiveType.Points);
+            GL1.addMeshWithoutNorm(GraphicGL.translateMesh(Point3d_GL.toMesh(face.centerEye.ToArray()), matr), PrimitiveType.Lines, 0.9f);
+            GL1.SortObj();
         }
+
+        private void but_det_landmark_Click(object sender, EventArgs e)
+        {
+            //var GL1 = (GraphicGL)obj;
+            det_landmark();
+
+        }
+
+
+
+        /* public void startdet_landmark()
+        {
+            try
+            {
+                Thread robot_thread = new Thread(det_landmark);
+                robot_thread.Start();
+            }
+            catch
+            {
+            }
+        }
+        private void det_landmark(object obj)
+        {        
+        }*/
     }
 }

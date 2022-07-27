@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Model;
 using Geometry;
 using FaceRecognitionDotNet;
+using Emgu.CV;
 
 namespace FaceAnalyse
 {
@@ -59,6 +60,10 @@ namespace FaceAnalyse
 
         static Face3d findBestFace(Face3d[] faces)
         {
+            if(faces==null)
+            {
+                return null;
+            }
             int[] inds = new int[faces.Length];
             int ind_max = 0;
             int val_max = 0;
@@ -101,14 +106,14 @@ namespace FaceAnalyse
             return p3d.ToArray();
         }
 
-        static Point3d_GL[] find3DPointsFromGl(PointF[] points, Model3d model)
+        static Point3d_GL[] find3DPointsFromGl(PointF[] points, Model3d model,double zoom)
         {
             var p3d = new List<Point3d_GL>();
             for (int j = 0; j < points.Length; j++)
             {
-                var p2d = new PointF(points[j].X, points[j].Y);
-                var p3 = model.take3dfrom2d(p2d);
-                //Console.WriteLine(points[j] + " " + p2d + " " + p3);
+                var p2d = new Point3d_GL(points[j].X, points[j].Y,0);
+                var p3 = model.take3dfrom2d_gl(p2d, zoom);
+                Console.WriteLine(points[j] + " " + p2d + " " + p3);
                 p3d.Add(p3);
             }
             return p3d.ToArray();
@@ -132,14 +137,14 @@ namespace FaceAnalyse
         }
 
 
-        public void setPoints3dFromModel(Model3d model,bool from_gl = false)
+        public void setPoints3dFromModel(Model3d model,double zoom,bool from_gl = false)
         {
             var ps3d_list = new List<Point3d_GL>();
             for(int i=0; i < parts.Length; i++)
             {
 
-                var ps3d_cur = find3DPointsFromTex(parts[i].ps2d, model);
-
+                var ps3d_cur = find3DPointsFromGl(parts[i].ps2d, model,zoom);
+                
                 parts[i].ps3d = ps3d_cur;
                 ps3d_list.AddRange(ps3d_cur);
             }
@@ -153,11 +158,47 @@ namespace FaceAnalyse
                 return new Point3d_GL(
                     new Point3d_GL(facePart.ps3d[1], facePart.ps3d[4]),
                     new Point3d_GL(facePart.ps3d[2], facePart.ps3d[5]));
-               // Console.WriteLine(facePart.ps3d[1]+"; "+ facePart.ps3d[4]);
-               // return new Point3d_GL(facePart.ps3d[1], facePart.ps3d[4]);
             }
             return Point3d_GL.notExistP();
         }
+
+        public Matrix<double> get_matrix_eye_center()
+        {
+            if(centerEye.Count>1)
+            {
+                return GetMatrixLineZ(centerEye[0], centerEye[1]);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        static Matrix<double> GetMatrixLineZ(Point3d_GL p1,Point3d_GL p2)
+        {
+            if(p2.x<p1.x)
+            {
+                var lm = p1.Clone();
+                p1 = p2.Clone();
+                p2 = lm.Clone();
+            }
+            var vec_x = new Vector3d_GL(p1, p2);
+            vec_x.normalize();
+            var vec_z = new Vector3d_GL(0, 0, -1);
+            var vec_y = vec_z | vec_x;
+            vec_y.normalize();
+            vec_z = vec_x | vec_y;
+            var rot_matr = new Matrix<double>(new double[,] {
+                { -vec_x.x, -vec_x.y, -vec_x.z, 0 },
+                { -vec_y.x, -vec_y.y, -vec_y.z, 0 },
+                { -vec_z.x, -vec_z.y, -vec_z.z, 0 },
+                { 0, 0, 0, 1} });
+            var p_c = new Point3d_GL(rot_matr * p1, rot_matr * p2);
+            rot_matr[0, 3] = -p_c.x;
+            rot_matr[1, 3] = -p_c.y;
+            rot_matr[2, 3] = -p_c.z;
+            return rot_matr;
+        }
+
     }
 
     public class FacePart3d

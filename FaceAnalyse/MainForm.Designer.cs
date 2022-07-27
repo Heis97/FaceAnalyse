@@ -122,11 +122,12 @@ namespace FaceAnalyse
             // 
             // imageBox1
             // 
-            this.imageBox1.Location = new System.Drawing.Point(858, 163);
+            this.imageBox1.Location = new System.Drawing.Point(1049, 479);
             this.imageBox1.Name = "imageBox1";
             this.imageBox1.Size = new System.Drawing.Size(500, 500);
             this.imageBox1.TabIndex = 2;
             this.imageBox1.TabStop = false;
+            this.imageBox1.Visible = false;
             this.imageBox1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.imageBox1_Move);
             // 
             // richTextBox1
@@ -179,7 +180,7 @@ namespace FaceAnalyse
             // 
             // imageBox2
             // 
-            this.imageBox2.Location = new System.Drawing.Point(561, 386);
+            this.imageBox2.Location = new System.Drawing.Point(858, 163);
             this.imageBox2.Name = "imageBox2";
             this.imageBox2.Size = new System.Drawing.Size(500, 500);
             this.imageBox2.TabIndex = 12;

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Geometry;
+using Emgu.CV;
+using Graphic;
 
 namespace Model
 {
@@ -16,17 +18,26 @@ namespace Model
         public float[] normale;
         public TriangleGl[] triangles;
         public Point3d_GL center;
-        public Model3d(string _path, bool centering = true)
+        public float scale;
+        public Matrix<double> matrix_norm;
+        
+        public Model3d(string _path, bool centering = true, float _scale = 1)
         {
             path = _path;
             var name_list = path.Split('.');
             var format = name_list[name_list.Length - 1].ToLower();
             var center1 = new Point3d_GL(0, 0, 0);
-            if(format == "obj")
+            scale = _scale;
+            matrix_norm = null;
+            if (format == "obj")
             {
                 var triang = new TriangleGl[0];
 
-                var arrays = parsingObj(path,out triang,out center1);
+                var arrays = parsingObj(path,out triang,out center1,scale,ref matrix_norm);
+                Console.WriteLine(matrix_norm[0, 0] + " " + matrix_norm[0, 1] + " " + matrix_norm[0, 2] + " " + matrix_norm[0, 3]);
+                Console.WriteLine(matrix_norm[1, 0] + " " + matrix_norm[1, 1] + " " + matrix_norm[1, 2] + " " + matrix_norm[1, 3]);
+                Console.WriteLine(matrix_norm[2, 0] + " " + matrix_norm[2, 1] + " " + matrix_norm[2, 2] + " " + matrix_norm[2, 3]);
+                Console.WriteLine(matrix_norm[3, 0] + " " + matrix_norm[3, 1] + " " + matrix_norm[3, 2] + " " + matrix_norm[3, 3]);
                 mesh = arrays[0];
                 texture = arrays[1];
                 normale = arrays[2];
@@ -217,7 +228,7 @@ namespace Model
             _center = new Point3d_GL( x_sr, y_sr, z_sr );
             return ret1;
         }
-        static public float[][] parsingObj(string path, out TriangleGl[] triangleGl, out Point3d_GL _center)
+        static public float[][] parsingObj(string path, out TriangleGl[] triangleGl, out Point3d_GL _center,float scale,ref Matrix<double> matrix)
         {
             var ret = new List<float[]>();
             string file1;
@@ -288,9 +299,9 @@ namespace Model
                     {
                         //Console.WriteLine
                         vertex[i_v] = new float[3];
-                        vertex[i_v][0] = (float)parseE(subline[1]);
-                        vertex[i_v][1] = (float)parseE(subline[2]);
-                        vertex[i_v][2] = (float)parseE(subline[3]);
+                        vertex[i_v][0] = scale * (float)parseE(subline[1]);
+                        vertex[i_v][1] = scale * (float)parseE(subline[2]);
+                        vertex[i_v][2] = scale * (float)parseE(subline[3]);
                         max_v = maxCompar(vertex[i_v], max_v);
                         min_v = minCompar(vertex[i_v], min_v);
 
@@ -395,16 +406,51 @@ namespace Model
 
                 triangleGl[i] = new TriangleGl(v1, v2, v3);
             }
-            ret.Add(vertexdata);
-            ret.Add(textureldata);
-            ret.Add(normaldata);
+            
 
             float x_sr = (max_v[0] - min_v[0]) / 2 + min_v[0];
             float y_sr = (max_v[1] - min_v[1]) / 2 + min_v[1];
             float z_sr = (max_v[2] - min_v[2]) / 2 + min_v[2];
-            _center = new Point3d_GL(x_sr, y_sr, z_sr);
+            var size_x = (max_v[0] - min_v[0]);
+            var size_y = (max_v[1] - min_v[1]);
+            var size_z = (max_v[2] - min_v[2]);
+            var size= Math.Max(size_z, Math.Max(size_x, size_y));
+            scale = 2f/size;
+            
+            _center = new Point3d_GL(-x_sr, -y_sr, -z_sr);
+            matrix = scale_matrix(scale) * transl_matrix(_center);
+            vertexdata = GraphicGL.translateMesh(vertexdata, matrix);
+            TriangleGl.multiply_matr(triangleGl, matrix);
+            ret.Add(vertexdata);
+            ret.Add(textureldata);
+            ret.Add(normaldata);
             return ret.ToArray();
         }
+
+        /*public void norm_mesh()
+        {
+           
+
+        }*/
+
+        static Matrix<double> scale_matrix(double scale)
+        {
+            return new Matrix<double>(new double[,] {
+                { scale, 0, 0, 0 },
+                { 0, scale, 0, 0 },
+                { 0, 0, scale, 0 },
+                { 0, 0, 0, 1} });
+        }
+
+        static Matrix<double> transl_matrix(Point3d_GL trans)
+        {
+            return new Matrix<double>(new double[,] {
+                { 1, 0, 0, trans.x },
+                { 0, 1, 0, trans.y },
+                { 0, 0, 1, trans.z },
+                { 0, 0, 0, 1 }});
+        }
+
         public List<double[,]> parsingStl_GL2(string path)
         {
             int i2 = 0;
@@ -485,7 +531,31 @@ namespace Model
             return new Point3d_GL(0, 0, 0);
         }
 
-        
+        public Point3d_GL take3dfrom2d_gl(Point3d_GL point,double zoom)
+        {
+            var p = norm_to_gl_xy(point, zoom);
+
+            if (triangles != null)
+            {
+                for (int i = 0; i < triangles.Length; i++)
+                {
+                    if (triangles[i].affilationPoint_xy(p))
+                    {
+                        //triangles[i].v1.p.z = 0;
+                        p.z = triangles[i].v1.p.z;
+                        return p;
+                        //return triangles[i].project_point_xy(p);
+                    }
+                }
+            }
+            return new Point3d_GL(0, 0, 0);
+        }
+        static Point3d_GL norm_to_gl_xy(Point3d_GL p,double zoom)
+        {
+            p.x = (p.x - 0.5) * 2 * zoom;
+            p.y = ( 0.5 - p.y) * 2 * zoom;
+            return p;
+        }
     }
 
 }

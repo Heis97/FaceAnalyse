@@ -34,10 +34,6 @@ namespace Model
                 var triang = new TriangleGl[0];
 
                 var arrays = parsingObj(path,out triang,out center1,scale,ref matrix_norm);
-                Console.WriteLine(matrix_norm[0, 0] + " " + matrix_norm[0, 1] + " " + matrix_norm[0, 2] + " " + matrix_norm[0, 3]);
-                Console.WriteLine(matrix_norm[1, 0] + " " + matrix_norm[1, 1] + " " + matrix_norm[1, 2] + " " + matrix_norm[1, 3]);
-                Console.WriteLine(matrix_norm[2, 0] + " " + matrix_norm[2, 1] + " " + matrix_norm[2, 2] + " " + matrix_norm[2, 3]);
-                Console.WriteLine(matrix_norm[3, 0] + " " + matrix_norm[3, 1] + " " + matrix_norm[3, 2] + " " + matrix_norm[3, 3]);
                 mesh = arrays[0];
                 texture = arrays[1];
                 normale = arrays[2];
@@ -72,9 +68,9 @@ namespace Model
         {
             for(int i=0; i<mesh.Length;i+=3)
             {
-                mesh[i] -= (float)center.x;
-                mesh[i+1] -= (float)center.y;
-                mesh[i+2] -= (float)center.z;
+                mesh[i] += (float)center.x;
+                mesh[i+1] += (float)center.y;
+                mesh[i+2] += (float)center.z;
             }
         }
         public float[] parsingTxt_Tab(string path)
@@ -272,7 +268,7 @@ namespace Model
             int[][] face_v = new int[f_len][];
             int[][] face_vt = new int[f_len][];
             int[][] face_vn = new int[f_len][];
-            triangleGl = new TriangleGl[f_len];
+            triangleGl = null;
             Console.WriteLine("Len v " + v_len);
             Console.WriteLine("Len vt " + vt_len);
             Console.WriteLine("Len vn " + vn_len);
@@ -288,6 +284,10 @@ namespace Model
             max_v[0] = float.MinValue;
             max_v[1] = float.MinValue;
             max_v[2] = float.MinValue;
+            double sum_x = 0;
+            double sum_y = 0;
+            double sum_z = 0;
+
             foreach (string str in lines)
             {
                 string line = str.Trim();
@@ -304,6 +304,9 @@ namespace Model
                         vertex[i_v][2] = scale * (float)parseE(subline[3]);
                         max_v = maxCompar(vertex[i_v], max_v);
                         min_v = minCompar(vertex[i_v], min_v);
+                        sum_x += vertex[i_v][0];
+                        sum_y += vertex[i_v][1];
+                        sum_z += vertex[i_v][2];
 
                         i_v++;
                     }
@@ -366,10 +369,10 @@ namespace Model
                 textureldata[i_vt] = texture[face_vt[i][0] - 1][0]; i_vt++;
                 textureldata[i_vt] = texture[face_vt[i][0] - 1][1]; i_vt++;
 
-                var v1 = new VertexGl(
+               /* var v1 = new VertexGl(
                     new Point3d_GL(vertexdata[i_v - 3], vertexdata[i_v - 2], vertexdata[i_v - 1]),
                     new Point3d_GL(normaldata[i_vn - 3], normaldata[i_vn - 2], normaldata[i_vn - 1]),
-                    new PointF(textureldata[i_vt - 2], textureldata[i_vt - 1]));
+                    new PointF(textureldata[i_vt - 2], textureldata[i_vt - 1]));*/
                 //--------------------------------------------------------------
 
                 vertexdata[i_v] = vertex[face_v[i][1] - 1][0]; i_v++;
@@ -383,10 +386,10 @@ namespace Model
                 textureldata[i_vt] = texture[face_vt[i][1] - 1][0]; i_vt++;
                 textureldata[i_vt] = texture[face_vt[i][1] - 1][1]; i_vt++;
 
-                var v2 = new VertexGl(
+               /* var v2 = new VertexGl(
                     new Point3d_GL(vertexdata[i_v - 3], vertexdata[i_v - 2], vertexdata[i_v - 1]),
                     new Point3d_GL(normaldata[i_vn - 3], normaldata[i_vn - 2], normaldata[i_vn - 1]),
-                    new PointF(textureldata[i_vt - 2], textureldata[i_vt - 1]));
+                    new PointF(textureldata[i_vt - 2], textureldata[i_vt - 1]));*/
                 //--------------------------------------------------------------
 
                 vertexdata[i_v] = vertex[face_v[i][2] - 1][0]; i_v++;
@@ -400,27 +403,27 @@ namespace Model
                 textureldata[i_vt] = texture[face_vt[i][2] - 1][0]; i_vt++;
                 textureldata[i_vt] = texture[face_vt[i][2] - 1][1]; i_vt++;
 
-                var v3 = new VertexGl(new Point3d_GL(vertexdata[i_v - 3], vertexdata[i_v - 2], vertexdata[i_v - 1]),
+              /*  var v3 = new VertexGl(new Point3d_GL(vertexdata[i_v - 3], vertexdata[i_v - 2], vertexdata[i_v - 1]),
                     new Point3d_GL(normaldata[i_vn - 3], normaldata[i_vn - 2], normaldata[i_vn - 1]),
-                    new PointF(textureldata[i_vt - 2], textureldata[i_vt - 1]));
+                    new PointF(textureldata[i_vt - 2], textureldata[i_vt - 1]));*/
 
-                triangleGl[i] = new TriangleGl(v1, v2, v3);
+                //triangleGl[i] = new TriangleGl(v1, v2, v3);
             }
             
 
-            float x_sr = (max_v[0] - min_v[0]) / 2 + min_v[0];
-            float y_sr = (max_v[1] - min_v[1]) / 2 + min_v[1];
-            float z_sr = (max_v[2] - min_v[2]) / 2 + min_v[2];
+            float x_sr = (max_v[0] + min_v[0]) / 2;
+            float y_sr = (max_v[1] + min_v[1]) / 2;
+            float z_sr = (max_v[2] + min_v[2]) / 2;
             var size_x = (max_v[0] - min_v[0]);
             var size_y = (max_v[1] - min_v[1]);
             var size_z = (max_v[2] - min_v[2]);
             var size= Math.Max(size_z, Math.Max(size_x, size_y));
             scale = 2f/size;
-            
-            _center = new Point3d_GL(-x_sr, -y_sr, -z_sr);
+            //Console.WriteLine(sum_x / i_v + " " + sum_y / i_v + " " + sum_z / i_v + " ");
+            _center = new Point3d_GL(-sum_x/v_len, -sum_y / v_len, -sum_z / v_len);
             matrix = scale_matrix(scale) * transl_matrix(_center);
-            vertexdata = GraphicGL.translateMesh(vertexdata, matrix);
-            TriangleGl.multiply_matr(triangleGl, matrix);
+            //vertexdata = GraphicGL.translateMesh(vertexdata, matrix);
+            //TriangleGl.multiply_matr(triangleGl, matrix);
             ret.Add(vertexdata);
             ret.Add(textureldata);
             ret.Add(normaldata);
@@ -432,6 +435,7 @@ namespace Model
            
 
         }*/
+       
 
         static Matrix<double> scale_matrix(double scale)
         {

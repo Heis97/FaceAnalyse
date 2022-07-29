@@ -128,6 +128,7 @@ namespace Graphic
         public int MouseLocID;
         public int MouseLocGLID;
         public int translMeshID;
+        public int comp_proj_ID;
     }
     public class GraphicGL
     {
@@ -140,7 +141,7 @@ namespace Graphic
         public viewType typeProj = viewType.Perspective;
         Size sizeControl;
         Point lastPos;
-
+        public int comp_proj = 0;
         int currentMonitor = 1;
 
         public int lightVis = 0;
@@ -183,9 +184,9 @@ namespace Graphic
         IDs idsPsOne = new IDs();
         IDs idsLsOne = new IDs();
         IDs idsCs = new IDs();
+        public int landmark_len = 100;
 
-
-        TextureGL posData, velData, massData,acsData,vertData;
+        public TextureGL landmark2d_data, landmark3d_data;
         public List<float[]> dataComputeShader = new List<float[]>();
         bool initComputeShader = false;
         public float[] resultComputeShader;
@@ -210,7 +211,9 @@ namespace Graphic
                 VPs[i] = retM[2];
                 Vs[i] = retM[1];
                 Ps[i] = retM[0];
-
+              /*  Console.WriteLine("Vs[i]");
+                Console.WriteLine(Vs[i]);
+                Console.WriteLine(Ps[i]);*/
                 txt += "TRZ " + i + ": "+transRotZooms[i].getInfo(transRotZooms.ToArray()).ToString()+"\n";
             }
 
@@ -304,7 +307,7 @@ namespace Graphic
             Gl.Initialize();
             Gl.Enable(EnableCap.Multisample);
             Gl.ClearColor(0.9f, 0.9f, 0.95f, 0.0f);
-            Gl.PointSize(3f);
+            Gl.PointSize(5f);
             Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 
@@ -337,15 +340,12 @@ namespace Graphic
             init_vars_gl(idsPsOne);
             init_vars_gl(idsLsOne);
 
-           // initComputeShader = init_textures(dataComputeShader);
-
-            // Gl.Enable(EnableCap.CullFace);
+            //initComputeShader = init_textures(dataComputeShader);
+            landmark2d_data = new TextureGL(1, landmark_len, 1, PixelFormat.Rgba);
+            landmark3d_data = new TextureGL(2, landmark_len, 1, PixelFormat.Rgba);
+            //Gl.Enable(EnableCap.CullFace);
             Gl.Enable(EnableCap.DepthTest);
-
         }
-
-        
-
 
         #region addBuffer
 
@@ -373,23 +373,6 @@ namespace Graphic
         }
         #endregion
 
-        private bool init_textures(List<float[]> data)
-        {
-           // Console.WriteLine(data.Count);
-            if (data.Count<3)
-            {
-                return false;
-            }
-            float[] pos3 = data[0];
-            float[] vel3 = data[1];
-            float[] mass1 = data[2];
-            posData = new TextureGL(0, pos3.Length, 1, PixelFormat.Rgb, pos3);
-            velData = new TextureGL(2, vel3.Length, 1, PixelFormat.Rgb, vel3);
-            massData = new TextureGL(3, mass1.Length, 1, PixelFormat.Red, mass1);
-            acsData = new TextureGL(4, pos3.Length, 1, PixelFormat.Rgb, null);
-            Console.WriteLine(posData.w + " " + posData.h + " " + posData.ch + " " + posData.data.Length);
-            return true;
-        }
         private void init_vars_gl(IDs ids)
         {
             Gl.UseProgram(ids.programID);
@@ -413,6 +396,8 @@ namespace Graphic
 
             ids.MouseLocID = Gl.GetUniformLocation(ids.programID, "MouseLoc");
             ids.MouseLocGLID = Gl.GetUniformLocation(ids.programID, "MouseLocGL");
+
+            ids.comp_proj_ID = Gl.GetUniformLocation(ids.programID, "comp_proj");
 
         }
         private void load_vars_gl(IDs ids, openGlobj openGlobj)
@@ -451,6 +436,7 @@ namespace Graphic
 
             Gl.Uniform1i(ids.textureVisID, 1, textureVis);
             Gl.Uniform1i(ids.lightVisID, 1, lightVis);
+            Gl.Uniform1i(ids.comp_proj_ID, 1, comp_proj);
         }
 
         #region texture
@@ -517,7 +503,7 @@ namespace Graphic
         #endregion
 
         #region util
-        string toStringBuf(float[] buff, int strip, int substrip, string name)
+        public string toStringBuf(float[] buff, int strip, int substrip, string name)
         {
             if (buff == null)
                 return name + " null ";
@@ -1028,9 +1014,10 @@ namespace Graphic
             }
             var glObj = new openGlobj(data_v, null, data_n, data_t, PrimitiveType.Triangles, 1, count, texid);
             
-            glObj.trsc[0].scale = scale;
-            glObj.trsc[0].transl = new Point3d_GL(0,0,0);
-            glObj.trsc[0].rotate = new Point3d_GL(0, 0, 0);
+            //glObj.trsc[0].scale = scale;
+            //glObj.trsc[0].transl = new Point3d_GL(0,0,0);
+           // glObj.trsc[0].rotate = new Point3d_GL(0, 0, 0);
+            glObj.trsc[0] = new trsc(Matrix4x4f.Identity);
             return buffersGl.add_obj(glObj.setBuffers());
         }
         void add_buff_gl_id(float[] data_v, float[] data_c, float[] data_n, PrimitiveType tp,int id)

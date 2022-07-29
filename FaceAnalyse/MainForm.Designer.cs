@@ -45,6 +45,7 @@ namespace FaceAnalyse
             this.but_xy_plane = new System.Windows.Forms.Button();
             this.but_det_landmark = new System.Windows.Forms.Button();
             this.imageBox2 = new Emgu.CV.UI.ImageBox();
+            this.but_align_face = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_X_L)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Y_L)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Z_L)).BeginInit();
@@ -122,12 +123,11 @@ namespace FaceAnalyse
             // 
             // imageBox1
             // 
-            this.imageBox1.Location = new System.Drawing.Point(1049, 479);
+            this.imageBox1.Location = new System.Drawing.Point(858, 163);
             this.imageBox1.Name = "imageBox1";
             this.imageBox1.Size = new System.Drawing.Size(500, 500);
             this.imageBox1.TabIndex = 2;
             this.imageBox1.TabStop = false;
-            this.imageBox1.Visible = false;
             this.imageBox1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.imageBox1_Move);
             // 
             // richTextBox1
@@ -180,17 +180,28 @@ namespace FaceAnalyse
             // 
             // imageBox2
             // 
-            this.imageBox2.Location = new System.Drawing.Point(858, 163);
+            this.imageBox2.Location = new System.Drawing.Point(539, 457);
             this.imageBox2.Name = "imageBox2";
             this.imageBox2.Size = new System.Drawing.Size(500, 500);
             this.imageBox2.TabIndex = 12;
             this.imageBox2.TabStop = false;
+            // 
+            // but_align_face
+            // 
+            this.but_align_face.Location = new System.Drawing.Point(739, 408);
+            this.but_align_face.Name = "but_align_face";
+            this.but_align_face.Size = new System.Drawing.Size(115, 43);
+            this.but_align_face.TabIndex = 13;
+            this.but_align_face.Text = "Выровнять лицо";
+            this.but_align_face.UseVisualStyleBackColor = true;
+            this.but_align_face.Click += new System.EventHandler(this.but_align_face_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1370, 749);
+            this.Controls.Add(this.but_align_face);
             this.Controls.Add(this.imageBox2);
             this.Controls.Add(this.but_det_landmark);
             this.Controls.Add(this.but_xy_plane);
@@ -231,6 +242,7 @@ namespace FaceAnalyse
         private System.Windows.Forms.Button but_xy_plane;
         private System.Windows.Forms.Button but_det_landmark;
         private Emgu.CV.UI.ImageBox imageBox2;
+        private System.Windows.Forms.Button but_align_face;
     }
 }
 

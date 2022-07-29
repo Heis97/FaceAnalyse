@@ -32,28 +32,26 @@ namespace FaceAnalyse
             GL1.lightYscroll(trackBar_Y_L.Value);
             GL1.lightZscroll(trackBar_Z_L.Value);
             glControl1.MouseWheel += GL1.Form1_mousewheel;
-
- 
-
         }
+
         void Init()
         {
             model = new Model3d(@"faces/Archive/25/25.0/Model.obj", false);
-            
-            //var cube2 = new Model3d(@"faces/cube2.obj");
             pict = new Mat(@"faces/Archive/25/25.0/Model.jpg");
-            //var pict2 = new Mat(@"faces/cube1.png");
-            CvInvoke.Resize(pict, pict, new System.Drawing.Size(1500, 1500));
 
+            //model = new Model3d(@"faces/Archive/RAW/SMALL2_model.obj", false);
+            //pict = new Mat(@"faces/Archive/RAW/SMALL2_model.jpg");
+            CvInvoke.Resize(pict, pict, new System.Drawing.Size(1500, 1500));
            
             imageBox1.Image = pict;
 
             GL1.addOBJ(model.mesh,model.normale, model.texture, 1, 1, pict);
+            GL1.buffersGl.setMatrobj(0, 0, trsc.toGLmatrix(model.matrix_norm));
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(1, 0, 0), new Point3d_GL(0, 1, 0), new Point3d_GL(0, 0, 1));
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(-1, 0, 0), new Point3d_GL(0, -1, 0), new Point3d_GL(0, 0, -1));
         }
 
-
+        
 
         #region gl_control
         private void glControl1_ContextCreated(object sender, GlControlEventArgs e)
@@ -255,26 +253,56 @@ namespace FaceAnalyse
         {
             GL1.planeXY();
         }
+
         async void det_landmark()
         {
-            var count = GL1.rendercout;
+           
+            var mat1 = (Mat)imageBox1.Image;
+            var face = detectingFace(mat1)[0];
+            imageBox2.Image = mat1;
+            await Task.Delay(200);
+            GL1.landmark2d_data.setData(face.getPointsData());
+            //Console.WriteLine( GL1.toStringBuf(face.getPointsData(),4,0,"det"));
+            GL1.comp_proj = 1;
+            await Task.Delay(200);
+            GL1.comp_proj = 0;
+
+            face.setPointsFromData(Point3d_GL.dataToPoints(GL1.landmark3d_data.getData()));
+            Console.WriteLine(GL1.toStringBuf(GL1.landmark3d_data.getData(), 4, 0, "det"));
+            var ps3d = face.getPoints3d();
+            GL1.addMeshWithoutNorm(Point3d_GL.toMesh(ps3d), PrimitiveType.Points);
+            GL1.addMeshWithoutNorm(Point3d_GL.toMesh(face.centerEye.ToArray()), PrimitiveType.Lines, 0.9f);
+
+            GL1.SortObj();
+            
+        }
+
+       
+        async void align_face()
+        {
+            prepare_face_gl();
+            await Task.Delay(200);
+            var mat1 = (Mat)imageBox1.Image;
+            var face = detectingFace(mat1)[0];
+            imageBox2.Image = mat1;
+            GL1.landmark2d_data.setData(face.getPointsData());
+            //Console.WriteLine(GL1.toStringBuf(face.getPointsData(), 4, 0, "align"));
+            GL1.comp_proj = 1;
+            await Task.Delay(200);
+            GL1.comp_proj = 0;
+
+            face.setPointsFromData(Point3d_GL.dataToPoints(GL1.landmark3d_data.getData()));
+            Console.WriteLine(GL1.toStringBuf(GL1.landmark3d_data.getData(), 4, 0, "align"));
+            face.getPoints3d();
+            var matr = face.get_matrix_eye_center();
+            GL1.buffersGl.addMatrobj(0, 0, trsc.toGLmatrix(matr));
+            GL1.SortObj();
+        }
+        void prepare_face_gl()
+        {
             GL1.lightVis = 1;
             GL1.textureVis = 1;
             GL1.transRotZooms[0].viewType_ = viewType.Ortho;
-            await Task.Delay(100);
-            var mat1 = (Mat)imageBox1.Image;
-            var face = setPointsModel(detectingFace(mat1), model, true);
-            imageBox2.Image = mat1;
-            var ps = face.getPoints3d();
-            Console.WriteLine("psL3D.Length " + ps.Length);
-            GL1.buffersGl.removeObj(0);
-            var matr = face.get_matrix_eye_center();
-            GL1.addOBJ(GraphicGL.translateMesh(model.mesh, matr),
-                model.normale, model.texture, 1, 1, pict);
-            // GL1.addMesh(TriangleGl.get_mesh(model.triangles),PrimitiveType.Triangles);
-            GL1.addMeshWithoutNorm(GraphicGL.translateMesh(Point3d_GL.toMesh(ps), matr), PrimitiveType.Points);
-            GL1.addMeshWithoutNorm(GraphicGL.translateMesh(Point3d_GL.toMesh(face.centerEye.ToArray()), matr), PrimitiveType.Lines, 0.9f);
-            GL1.SortObj();
         }
 
         private void but_det_landmark_Click(object sender, EventArgs e)
@@ -282,6 +310,11 @@ namespace FaceAnalyse
             //var GL1 = (GraphicGL)obj;
             det_landmark();
 
+        }
+
+        private void but_align_face_Click(object sender, EventArgs e)
+        {
+            align_face();
         }
 
 

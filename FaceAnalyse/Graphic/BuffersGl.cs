@@ -105,6 +105,14 @@ namespace Graphic
         {
             objs_dynamic[id] = objs_dynamic[id].setRotZ(i,z);
         }
+        public void setMatrobj(int id, int i, Matrix4x4f matr)
+        {
+            objs_dynamic[id] = objs_dynamic[id].setMatr(i, matr);
+        }
+        public void addMatrobj(int id, int i, Matrix4x4f matr)
+        {
+            objs_dynamic[id] = objs_dynamic[id].addMatr(i, matr);
+        }
         #endregion
 
 

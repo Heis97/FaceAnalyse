@@ -1,12 +1,15 @@
 ﻿#version 430 core
 layout (triangles, invocations = 1) in;
 layout (triangle_strip, max_vertices = 3) out;
+layout(rgba32f, binding = 1) uniform  image2D landmark2d_data;
+layout(rgba32f, binding = 2) uniform  image2D landmark3d_data;
 uniform vec3 LightPosition_world;
 uniform mat4 VPs[4];
 uniform mat4 Vs[4];
 uniform mat4 Ps[4];
 uniform vec2 MouseLoc;
 uniform vec2 MouseLocGL;
+uniform int comp_proj;
 
 in VS_GS_INTERFACE
 {
@@ -43,18 +46,48 @@ bool checkPointInTriangle(vec2 _A,vec2 _B,vec2 _C,vec2 _P)
     return(false);
 }
 
+void compProjection(mat4 VP)
+{
+	vec4 A = VP * vec4(vs_out[0].vertexPosition_world, 1.0);
+	vec4 B = VP * vec4(vs_out[1].vertexPosition_world, 1.0);
+	vec4 C = VP * vec4(vs_out[2].vertexPosition_world, 1.0);
+	
+	for (int i = 0; i<imageSize(landmark2d_data).x; i++)
+	{
+		float prev_z = imageLoad(landmark3d_data, ivec2(i, 0)).z;
+		vec2 P_2d = imageLoad(landmark2d_data, ivec2(i, 0)).xy;
+		vec2 P_3d = (VP * vec4(P_2d,0, 1.0)).xy;
+		if (checkPointInTriangle(A.xy, B.xy, C.xy, P_3d))
+		{
+			vec4 p3d = inverse(VP) * A;
+			if (p3d.z > prev_z)
+			{
+				imageStore(landmark3d_data, ivec2(i, 0), p3d);
+			}
+			
+		}
+	}
+	
+}
+
 void main() 
 {
+	gl_ViewportIndex = gl_InvocationID;
 	bool selected_triangle = checkPointInTriangle(
-	vs_out[0].vertexTexture,
-	vs_out[1].vertexTexture,
-	vs_out[2].vertexTexture,
-	MouseLoc);
+		(VPs[gl_InvocationID] * vec4(vs_out[0].vertexPosition_world, 1.0)).xy,
+		(VPs[gl_InvocationID] * vec4(vs_out[1].vertexPosition_world, 1.0)).xy,
+		(VPs[gl_InvocationID] * vec4(vs_out[2].vertexPosition_world, 1.0)).xy,
+	MouseLocGL);
+	if (comp_proj == 1)
+	{
+		compProjection(Vs[gl_InvocationID]);
+	}
+	
 
 
    for (int i = 0; i < gl_in.length(); i++)
    { 
-	    gl_ViewportIndex = gl_InvocationID;
+	    
         gl_Position = VPs[gl_InvocationID] * vec4(vs_out[i].vertexPosition_world, 1.0);
 
 	    fs_in.Position_world = vs_out[i].vertexPosition_world;
@@ -69,6 +102,7 @@ void main()
 		{
 		    fs_in.Color = vec3(0,1,0);
 		}
+
 	    EmitVertex();
 	}
 }

@@ -135,6 +135,53 @@ namespace FaceAnalyse
             }
             return ps3d_list.ToArray();
         }
+        static Point3d_GL norm_to2d_gl(PointF p)
+        {
+            var x = (p.X - 0.5) * 2;
+            var y = (0.5 - p.Y) * 2;
+            return new Point3d_GL(x,y,0);
+        }
+
+        public float[] getPointsData()
+        {
+            var ps3d_list = new List<Point3d_GL>();
+            for (int i = 0; i < parts.Length; i++)
+            {
+                for (int j = 0; j < parts[i].ps2d.Length; j++)
+                {
+                    ps3d_list.Add(norm_to2d_gl(parts[i].ps2d[j]));
+                }
+            }
+            return Point3d_GL.toData(ps3d_list.ToArray());
+        }
+        public void setPointsFromData(Point3d_GL[] data)
+        {
+            int data_i = 0;
+            for (int i = 0; i < parts.Length; i++)
+            {
+                var ps3d_part = new List<Point3d_GL>();
+                for (int j = 0; j < parts[i].ps2d.Length; j++)
+                {
+                    ps3d_part.Add(data[data_i]);
+                    data_i++;
+                }
+                parts[i].ps3d = ps3d_part.ToArray();
+            }
+        }
+        public void setPointsFromData3dp(float[] data)
+        {
+            int data_i = 0;
+            for (int i = 0; i < parts.Length; i++)
+            {
+                var ps3d_part = new List<Point3d_GL>();
+                for (int j = 0; j < parts[i].ps2d.Length; j++)
+                {
+                    ps3d_part.Add(new Point3d_GL(data[data_i], data[data_i + 1], data[data_i] + 2));
+                    data_i += 4;
+                }
+                parts[i].ps3d = ps3d_part.ToArray();
+            }
+        }
 
 
         public void setPoints3dFromModel(Model3d model,double zoom,bool from_gl = false)

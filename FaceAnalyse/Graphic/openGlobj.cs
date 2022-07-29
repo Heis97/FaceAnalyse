@@ -192,6 +192,17 @@ namespace Graphic
             trsc[i].rotate.z = z;
             return this;
         }
+
+        public openGlobj setMatr(int i, Matrix4x4f matr)
+        {
+            trsc[i].matr = matr;
+            return this;
+        }
+        public openGlobj addMatr(int i, Matrix4x4f matr)
+        {
+            trsc[i].matr = matr * trsc[i].matr;
+            return this;
+        }
         #endregion
     }
 

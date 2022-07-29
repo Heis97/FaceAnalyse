@@ -187,7 +187,29 @@ namespace Geometry
             var matrix = Matrix4x4ToDouble(matrixA);
             return matrix * p;
         }
+        public static float[] toData(Point3d_GL[] ps)
+        {
+            var data = new float[ps.Length * 4];
+            for(int i=0; i<ps.Length; i++)
+            {
+                data[4 * i] = (float)ps[i].x;
+                data[4 * i + 1] = (float)ps[i].y;
+                data[4 * i + 2] = (float)ps[i].z;
+            }
+            return data;
+        }
 
+        public static Point3d_GL[] dataToPoints(float[] data)
+        {
+            var ps = new Point3d_GL[data.Length / 4];
+            for (int i = 0; i < ps.Length; i++)
+            {
+                ps[i].x = data[4 * i];
+                ps[i].y = data[4 * i + 1];
+                ps[i].z = data[4 * i + 2];
+            }
+            return ps;
+        }
         public static Point3d_GL operator +(Point3d_GL p, Vector3d_GL v1)
         {
             return new Point3d_GL(p.x + v1.x, p.y + v1.y, p.z + v1.z);

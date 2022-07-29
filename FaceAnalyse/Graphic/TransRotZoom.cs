@@ -16,30 +16,58 @@ namespace Graphic
         public Point3d_GL transl;
         public Point3d_GL rotate;
         public float scale;
+        public Matrix4x4f matr;
+
 
         public trsc(Point3d_GL _transl, Point3d_GL _rotate, float _scale)
         {
             transl = _transl.Clone();
             rotate = _rotate.Clone();
             scale = _scale;
+            matr = Matrix4x4f.Identity;
         }
         public trsc(double x, double y, double z, double rx, double ry, double rz, float _scale)
         {
             transl = new Point3d_GL(x, y, z);
             rotate = new Point3d_GL(rx, ry, rz);
             scale = _scale;
+            matr = Matrix4x4f.Identity;
+        }
+        public trsc(Matrix4x4f _matr)
+        {
+            transl = Point3d_GL.notExistP();
+            
+            rotate = new Point3d_GL(0, 0, 0);
+            scale = 1;
+            matr = _matr;
         }
 
         public Matrix4x4f getModelMatrix()
         {
-           return  Matrix4x4f.Translated((float)transl.x, (float)transl.y, (float)transl.z) *
+            if(!transl.exist)
+            {
+                return matr;
+            }
+            return  Matrix4x4f.Translated((float)transl.x, (float)transl.y, (float)transl.z) *
                 Matrix4x4f.RotatedX((float)rotate.x) *
                 Matrix4x4f.RotatedY((float)rotate.y) *
                 Matrix4x4f.RotatedZ((float)rotate.z) *
                 Matrix4x4f.Scaled(scale, scale, scale);
         }
 
-
+        public static Matrix4x4f toGLmatrix(Matrix<double>  matrixCV)
+        {
+            var matrixCV_T = matrixCV.Transpose();
+            var matrixGL = Matrix4x4f.Identity;
+            for (int i=0;i<matrixCV_T.Width;i++)
+            {
+                for (int j = 0; j < matrixCV_T.Height; j++)
+                {
+                    matrixGL[(uint)i, (uint)j] = (float)matrixCV_T[i, j];
+                }
+            }
+            return matrixGL;
+        }
     }
 
     public class TransRotZoom
@@ -265,7 +293,7 @@ namespace Graphic
             else if (viewType_ == viewType.Ortho)
             {
                 float window =(float) zoom;
-                var _Pm = Matrix4x4f.Ortho(-window, window, -window, window, 0.00001f, 10000f);
+                var _Pm = Matrix4x4f.Ortho(-window, window, -window, window, -1000f, 1000f);
                 var _Vm = Matrix4x4f.Translated((float)off_x, -(float)off_y, (float)zoom * (float)off_z) *
                     Matrix4x4f.RotatedX((float)xRot) *
                     Matrix4x4f.RotatedY((float)yRot) *

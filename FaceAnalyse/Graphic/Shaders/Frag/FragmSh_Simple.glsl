@@ -19,13 +19,14 @@ vec2 TextureUV;
 out vec4 color;
 void main() {
 
-	if(textureVis == 1)
+	/*if (textureVis == 1)
 	{
 		color = texture( textureSample,  fs_in.TextureUV );
 	}
 	else
 	{
-	    color.xyz = fs_in.Color;
-		color.w = 1.0;
-	}
+	    
+	}*/
+	color.xyz = fs_in.Color;
+	color.w = 1.0;
 }

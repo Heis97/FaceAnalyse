@@ -101,7 +101,7 @@ namespace Graphic
             rect = _rect;
             id = _id;
             type = TRZtype.Master;
-            viewType_ = viewType.Perspective;
+            viewType_ = viewType.Ortho;
             visible = false;
             
         }

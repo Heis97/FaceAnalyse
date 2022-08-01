@@ -22,6 +22,7 @@ namespace Graphic
         public int id;
         public int Textureid;
         public bool visible;
+        public float transparency;
         uint buff_array;
 
         public trsc[] trsc;
@@ -35,7 +36,8 @@ namespace Graphic
             normal_buffer_data = new float[n_buf.Length];
             trsc = new trsc[_count];
             count = _count;
-            for(int i=0; i<_count;i++)
+            transparency = 1f;
+            for (int i=0; i<_count;i++)
             {
                 trsc[i] = new trsc(0, 0, 0, 0, 0, 0, 1);
             }
@@ -60,6 +62,7 @@ namespace Graphic
                 color_buffer_data = new float[c_buf.Length];
                 c_buf.CopyTo(color_buffer_data, 0);
             }
+           // Console.WriteLine(color_buffer_data[0] + " " + color_buffer_data[1] + " " + color_buffer_data[2]);
             vert_len =(int) v_buf.Length / 3;
             v_buf.CopyTo(vertex_buffer_data, 0);       
             n_buf.CopyTo(normal_buffer_data, 0);
@@ -74,7 +77,9 @@ namespace Graphic
             else
             {
                 animType = AnimType.Dynamic;
+                setBuffers();
             }
+            
         }
 
         public openGlobj setBuffers()
@@ -201,6 +206,11 @@ namespace Graphic
         public openGlobj addMatr(int i, Matrix4x4f matr)
         {
             trsc[i].matr = matr * trsc[i].matr;
+            return this;
+        }
+        public openGlobj setTrasp(float trans)
+        {
+            transparency = trans;
             return this;
         }
         #endregion

@@ -46,6 +46,8 @@ namespace FaceAnalyse
             this.but_det_landmark = new System.Windows.Forms.Button();
             this.imageBox2 = new Emgu.CV.UI.ImageBox();
             this.but_align_face = new System.Windows.Forms.Button();
+            this.but_show_faces = new System.Windows.Forms.Button();
+            this.but_norm_inv = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_X_L)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Y_L)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Z_L)).BeginInit();
@@ -108,7 +110,7 @@ namespace FaceAnalyse
             this.trackBar_Z_L.Name = "trackBar_Z_L";
             this.trackBar_Z_L.Size = new System.Drawing.Size(225, 45);
             this.trackBar_Z_L.TabIndex = 4;
-            this.trackBar_Z_L.Value = 40;
+            this.trackBar_Z_L.Value = 80;
             this.trackBar_Z_L.Scroll += new System.EventHandler(this.trackBar_Z_L_Scroll);
             // 
             // but_textureVision
@@ -180,7 +182,7 @@ namespace FaceAnalyse
             // 
             // imageBox2
             // 
-            this.imageBox2.Location = new System.Drawing.Point(539, 457);
+            this.imageBox2.Location = new System.Drawing.Point(858, 163);
             this.imageBox2.Name = "imageBox2";
             this.imageBox2.Size = new System.Drawing.Size(500, 500);
             this.imageBox2.TabIndex = 12;
@@ -196,11 +198,33 @@ namespace FaceAnalyse
             this.but_align_face.UseVisualStyleBackColor = true;
             this.but_align_face.Click += new System.EventHandler(this.but_align_face_Click);
             // 
+            // but_show_faces
+            // 
+            this.but_show_faces.Location = new System.Drawing.Point(737, 457);
+            this.but_show_faces.Name = "but_show_faces";
+            this.but_show_faces.Size = new System.Drawing.Size(64, 43);
+            this.but_show_faces.TabIndex = 14;
+            this.but_show_faces.Text = "Показать грани";
+            this.but_show_faces.UseVisualStyleBackColor = true;
+            this.but_show_faces.Click += new System.EventHandler(this.but_show_faces_Click);
+            // 
+            // but_norm_inv
+            // 
+            this.but_norm_inv.Location = new System.Drawing.Point(801, 457);
+            this.but_norm_inv.Name = "but_norm_inv";
+            this.but_norm_inv.Size = new System.Drawing.Size(53, 43);
+            this.but_norm_inv.TabIndex = 15;
+            this.but_norm_inv.Text = "Инв нормали";
+            this.but_norm_inv.UseVisualStyleBackColor = true;
+            this.but_norm_inv.Click += new System.EventHandler(this.but_norm_inv_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1370, 749);
+            this.Controls.Add(this.but_norm_inv);
+            this.Controls.Add(this.but_show_faces);
             this.Controls.Add(this.but_align_face);
             this.Controls.Add(this.imageBox2);
             this.Controls.Add(this.but_det_landmark);
@@ -243,6 +267,8 @@ namespace FaceAnalyse
         private System.Windows.Forms.Button but_det_landmark;
         private Emgu.CV.UI.ImageBox imageBox2;
         private System.Windows.Forms.Button but_align_face;
+        private System.Windows.Forms.Button but_show_faces;
+        private System.Windows.Forms.Button but_norm_inv;
     }
 }
 

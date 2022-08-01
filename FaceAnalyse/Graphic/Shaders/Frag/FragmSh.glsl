@@ -7,15 +7,16 @@ uniform float lightPower;
 uniform sampler2D textureSample;
 uniform int textureVis;
 uniform int lightVis;
+uniform float transparency;
 
 in GS_FS_INTERFACE
 {
-vec3 Position_world;
-vec3 Color;
-vec3 Normal_camera;
-vec3 EyeDirection_camera;
-vec3 LightDirection_camera;
-vec2 TextureUV;
+	vec3 Position_world;
+	vec3 Color;
+	vec3 Normal_camera;
+	vec3 EyeDirection_camera;
+	vec3 LightDirection_camera;
+	vec2 TextureUV;
 }fs_in;
 out vec4 color;
 void main() {
@@ -47,13 +48,12 @@ void main() {
 	
 
 	color.xyz = MaterialAmbientColor + MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance*distance) +MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance);
-	color.w = 1.0;
+	color.w = transparency;
 
 	if(lightVis == 1)
 	{
 		color.xyz = MaterialDiffuseColor;
 	}
-
+	
 	color.xyz += fs_in.Color;
-
 }

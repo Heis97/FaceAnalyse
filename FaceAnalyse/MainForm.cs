@@ -25,6 +25,7 @@ namespace FaceAnalyse
         private GraphicGL GL1 = new GraphicGL();
         Model3d model;
         Mat pict;
+        int face_model;
         public MainForm()
         {
             InitializeComponent();
@@ -41,12 +42,24 @@ namespace FaceAnalyse
 
             //model = new Model3d(@"faces/Archive/RAW/SMALL2_model.obj", false);
             //pict = new Mat(@"faces/Archive/RAW/SMALL2_model.jpg");
-            CvInvoke.Resize(pict, pict, new System.Drawing.Size(1500, 1500));
-           
+            CvInvoke.Resize(pict, pict, new System.Drawing.Size(1500, 1500));           
             imageBox1.Image = pict;
+            
+            
+            face_model = GL1.addOBJ(model.mesh,model.normale, model.texture, 1, 1, pict);
+            //GL1.buffersGl.setTranspobj(face_model, 0.3f);
 
-            GL1.addOBJ(model.mesh,model.normale, model.texture, 1, 1, pict);
-            GL1.buffersGl.setMatrobj(0, 0, trsc.toGLmatrix(model.matrix_norm));
+            var flatxy1 = GL1.addFlat3d_XY(0);
+            GL1.buffersGl.setTranspobj(flatxy1, 0.3f);
+            var flatxy2 = GL1.addFlat3d_XY(0.2);
+            GL1.buffersGl.setTranspobj(flatxy2, 0.3f);
+
+            var flatzy1 = GL1.addFlat3d_ZY(-0.2);
+            GL1.buffersGl.setTranspobj(flatzy1, 0.3f);
+
+            var flatzy2 = GL1.addFlat3d_ZY(0.2);
+            GL1.buffersGl.setTranspobj(flatzy2, 0.3f);
+            GL1.buffersGl.setMatrobj(face_model, 0, trsc.toGLmatrix(model.matrix_norm));
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(1, 0, 0), new Point3d_GL(0, 1, 0), new Point3d_GL(0, 0, 1));
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(-1, 0, 0), new Point3d_GL(0, -1, 0), new Point3d_GL(0, 0, -1));
         }
@@ -268,7 +281,7 @@ namespace FaceAnalyse
             GL1.comp_proj = 0;
 
             face.setPointsFromData(Point3d_GL.dataToPoints(GL1.landmark3d_data.getData()));
-            Console.WriteLine(GL1.toStringBuf(GL1.landmark3d_data.getData(), 4, 0, "det"));
+            //Console.WriteLine(GL1.toStringBuf(GL1.landmark3d_data.getData(), 4, 0, "det"));
             var ps3d = face.getPoints3d();
             GL1.addMeshWithoutNorm(Point3d_GL.toMesh(ps3d), PrimitiveType.Points);
             GL1.addMeshWithoutNorm(Point3d_GL.toMesh(face.centerEye.ToArray()), PrimitiveType.Lines, 0.9f);
@@ -283,7 +296,12 @@ namespace FaceAnalyse
             prepare_face_gl();
             await Task.Delay(200);
             var mat1 = (Mat)imageBox1.Image;
-            var face = detectingFace(mat1)[0];
+            var faces = detectingFace(mat1);
+            if(faces == null)
+            {
+                return;
+            }
+            var face = faces[0];
             imageBox2.Image = mat1;
             GL1.landmark2d_data.setData(face.getPointsData());
             //Console.WriteLine(GL1.toStringBuf(face.getPointsData(), 4, 0, "align"));
@@ -292,10 +310,10 @@ namespace FaceAnalyse
             GL1.comp_proj = 0;
 
             face.setPointsFromData(Point3d_GL.dataToPoints(GL1.landmark3d_data.getData()));
-            Console.WriteLine(GL1.toStringBuf(GL1.landmark3d_data.getData(), 4, 0, "align"));
+           // Console.WriteLine(GL1.toStringBuf(GL1.landmark3d_data.getData(), 4, 0, "align"));
             face.getPoints3d();
             var matr = face.get_matrix_eye_center();
-            GL1.buffersGl.addMatrobj(0, 0, trsc.toGLmatrix(matr));
+            GL1.buffersGl.addMatrobj(face_model, 0, trsc.toGLmatrix(matr));
             GL1.SortObj();
         }
         void prepare_face_gl()
@@ -303,6 +321,7 @@ namespace FaceAnalyse
             GL1.lightVis = 1;
             GL1.textureVis = 1;
             GL1.transRotZooms[0].viewType_ = viewType.Ortho;
+            GL1.transRotZooms[0].zoom = 1;
         }
 
         private void but_det_landmark_Click(object sender, EventArgs e)
@@ -315,6 +334,30 @@ namespace FaceAnalyse
         private void but_align_face_Click(object sender, EventArgs e)
         {
             align_face();
+        }
+
+        private void but_show_faces_Click(object sender, EventArgs e)
+        {
+            if (GL1.show_faces == 0)
+            {
+                GL1.show_faces = 1;
+            }
+            else
+            {
+                GL1.show_faces = 0;
+            }
+        }
+
+        private void but_norm_inv_Click(object sender, EventArgs e)
+        {
+            if (GL1.inv_norm == 0)
+            {
+                GL1.inv_norm = 1;
+            }
+            else
+            {
+                GL1.inv_norm = 0;
+            }
         }
 
 

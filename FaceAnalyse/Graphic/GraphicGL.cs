@@ -129,15 +129,22 @@ namespace Graphic
         public int MouseLocGLID;
         public int translMeshID;
         public int comp_proj_ID;
+        public int render_count_ID;
+        public int show_faces_ID;
+        public int transparency_ID;
+        public int inv_norm_ID;
+        
     }
     public class GraphicGL
     {
         #region vars
         static float PI = 3.1415926535f;
+        public int inv_norm = 0;
+        public int show_faces = 0;
         public int startGen = 0;
         public int saveImagesLen = 0;
-        public int renderdelim = 1500;
-        public int rendercout = 0;
+        public int render_delim = 150000;
+        public int render_count = 0;
         public viewType typeProj = viewType.Perspective;
         Size sizeControl;
         Point lastPos;
@@ -241,10 +248,10 @@ namespace Graphic
                 }
             }
             
-            rendercout++;
-            if(rendercout%renderdelim==0)
+            render_count++;
+            if(render_count%render_delim==0)
             {
-                rendercout = 0;
+                render_count = 0;
             }
         }
 
@@ -306,6 +313,8 @@ namespace Graphic
             sizeControl = ((Control)sender).Size;
             Gl.Initialize();
             Gl.Enable(EnableCap.Multisample);
+            Gl.Enable(EnableCap.Blend);
+            Gl.BlendFunc(BlendingFactor.SrcAlpha,BlendingFactor.OneMinusSrcAlpha);
             Gl.ClearColor(0.9f, 0.9f, 0.95f, 0.0f);
             Gl.PointSize(5f);
             Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -344,7 +353,7 @@ namespace Graphic
             landmark2d_data = new TextureGL(1, landmark_len, 1, PixelFormat.Rgba);
             landmark3d_data = new TextureGL(2, landmark_len, 1, PixelFormat.Rgba);
             //Gl.Enable(EnableCap.CullFace);
-            Gl.Enable(EnableCap.DepthTest);
+           Gl.Enable(EnableCap.DepthTest);
         }
 
         #region addBuffer
@@ -398,7 +407,10 @@ namespace Graphic
             ids.MouseLocGLID = Gl.GetUniformLocation(ids.programID, "MouseLocGL");
 
             ids.comp_proj_ID = Gl.GetUniformLocation(ids.programID, "comp_proj");
-
+            ids.render_count_ID = Gl.GetUniformLocation(ids.programID, "render_count");
+            ids.show_faces_ID = Gl.GetUniformLocation(ids.programID, "show_faces");
+            ids.transparency_ID = Gl.GetUniformLocation(ids.programID, "transparency");
+            ids.inv_norm_ID = Gl.GetUniformLocation(ids.programID, "inv_norm");
         }
         private void load_vars_gl(IDs ids, openGlobj openGlobj)
         {
@@ -437,6 +449,11 @@ namespace Graphic
             Gl.Uniform1i(ids.textureVisID, 1, textureVis);
             Gl.Uniform1i(ids.lightVisID, 1, lightVis);
             Gl.Uniform1i(ids.comp_proj_ID, 1, comp_proj);
+            Gl.Uniform1i(ids.render_count_ID, 1, render_count);
+            Gl.Uniform1i(ids.show_faces_ID, 1, show_faces);
+            Gl.Uniform1f(ids.transparency_ID, 1, openGlobj.transparency);
+            Gl.Uniform1i(ids.inv_norm_ID, 1, inv_norm);
+
         }
 
         #region texture
@@ -721,11 +738,11 @@ namespace Graphic
                     break;
             }
         }
+
         public void glControl_MouseMove(object sender, MouseEventArgs e)
         {
 
             var cont = (Control)sender;
-            MouseLocGL = new Vertex2f((float)e.X / (0.5f * (float)cont.Width) - 1f, -((float)e.Y / (0.5f * (float)cont.Height) - 1f));
             int sel_trz = selectTRZ(e);
             if(sel_trz < 0)
             {
@@ -736,7 +753,10 @@ namespace Graphic
             {
                 Label_cor_cur.Text = e.X + " " + e.Y;
             }
-            
+            MouseLocGL = new Vertex2f(
+                (float)trz.zoom*((float)e.X / (0.5f * (float)cont.Width) - 1f),
+                -((float)trz.zoom * ((float)e.Y / (0.5f * (float)cont.Height) - 1f)));
+
             int w = trz.rect.Width;
             int h = trz.rect.Height;
             switch (modeGL)
@@ -960,8 +980,64 @@ namespace Graphic
         }
         #endregion
         #region mesh
- 
-        
+        public int addFlat3d_XY(double z = 0)
+        {
+            double x = 1;
+            double y = 1;
+
+            var p0 = new Point3d_GL(x ,y, z);
+            var p1 = new Point3d_GL(x, -y, z);
+            var p2 = new Point3d_GL(-x, -y, z);
+            var p3 = new Point3d_GL(-x, y, z);
+
+            var ps = new Point3d_GL[]
+            {
+                p0,p1,p2,
+                p0,p2,p3
+            };
+            //addMesh(Point3d_GL.toMesh(ps), PrimitiveType.Triangles);
+            var mesh = Point3d_GL.toMesh(ps);
+            return add_buff_gl_dyn_col(mesh, computeNormals(mesh), new Vertex3f(0, 0, 1), PrimitiveType.Triangles);
+        }
+
+        public int addFlat3d_ZY(double x = 0)
+        {
+            double z = 1;
+            double y = 1;
+
+            var p0 = new Point3d_GL(x, y, z);
+            var p1 = new Point3d_GL(x, y, -z);
+            var p2 = new Point3d_GL(x, -y, -z);
+            var p3 = new Point3d_GL(x, -y, z);
+
+            var ps = new Point3d_GL[]
+            {
+                p0,p1,p2,
+                p0,p2,p3
+            };
+            //addMesh(Point3d_GL.toMesh(ps), PrimitiveType.Triangles);
+            var mesh = Point3d_GL.toMesh(ps);
+            return add_buff_gl_dyn_col(mesh, computeNormals(mesh), new Vertex3f(1, 0, 0), PrimitiveType.Triangles);
+        }
+        public int addFlat3d_XY_zero(double z = 0)
+        {
+            Flat3d_GL flat3D_GL = new Flat3d_GL(new Point3d_GL(10, 0, z), new Point3d_GL(10, 10, z), new Point3d_GL(0, 10, z));
+            var p0 = (new Line3d_GL(new Vector3d_GL(0, 0, 10), new Point3d_GL(-50, -10, 0))).calcCrossFlat(flat3D_GL);
+            var p1 = (new Line3d_GL(new Vector3d_GL(0, 0, 10), new Point3d_GL(50, -10, 0))).calcCrossFlat(flat3D_GL);
+
+            var p2 = (new Line3d_GL(new Vector3d_GL(0, 0, 10), new Point3d_GL(-50, 100, 0))).calcCrossFlat(flat3D_GL);
+            var p3 = (new Line3d_GL(new Vector3d_GL(0, 0, 10), new Point3d_GL(50, 100, 0))).calcCrossFlat(flat3D_GL);
+
+            var ps = new Point3d_GL[]
+            {
+                p1,p3,p2,
+                p2,p0,p1
+            };
+            //addMesh(Point3d_GL.toMesh(ps), PrimitiveType.Triangles);
+            var mesh = Point3d_GL.toMesh(ps);
+            return add_buff_gl_dyn_col(mesh, computeNormals(mesh),new Vertex3f(1,0,0), PrimitiveType.Triangles);
+        }
+
         float[] toFloat(Point3d_GL[] points)
         {
             var fl = new float[points.Length * 3];
@@ -989,6 +1065,28 @@ namespace Graphic
         {
             buffersGl.add_obj(new openGlobj(data_v, null, data_n, data_t, tp));
         }
+        public int add_buff_gl_dyn(float[] data_v, float[] data_n, PrimitiveType tp)
+        {
+            return buffersGl.add_obj(new openGlobj(data_v, null, data_n, null, tp));
+        }
+        static float[] color_buf(Vertex3f color, int len)
+        {
+            var color_buf = new float[len];
+            for(int i=0; i<len/3;i++)
+            {
+                color_buf[3 * i] = color.x;
+                color_buf[3 * i+1] = color.y;
+                color_buf[3 * i+2] = color.z;
+            }
+            //Console.WriteLine("col_buf");
+            //Console.WriteLine(color_buf[0] + " " + color_buf[1] + " " + color_buf[2]);
+            return color_buf;
+        }
+        public int add_buff_gl_dyn_col(float[] data_v, float[] data_n, Vertex3f color, PrimitiveType tp)
+        {
+
+            return buffersGl.add_obj(new openGlobj(data_v, color_buf(color,data_v.Length), data_n, null, tp, 0));
+        }
         public void add_buff_gl(float[] data_v, float[] data_c, float[] data_n, PrimitiveType tp)
         {            
             buffersGl.add_obj(new openGlobj(data_v, data_c, data_n,null,  tp));
@@ -1001,7 +1099,7 @@ namespace Graphic
             glObj.trsc[0].scale = scale;
             glObj.trsc[0].transl = trans;
             glObj.trsc[0].rotate = rotate;       
-            return buffersGl.add_obj(glObj.setBuffers());
+            return buffersGl.add_obj(glObj);
         }
 
         public int addOBJ(float[] data_v, float[] data_n, float[] data_t, float scale = 1, int count = 1, Mat pic = null)
@@ -1018,10 +1116,11 @@ namespace Graphic
             //glObj.trsc[0].transl = new Point3d_GL(0,0,0);
            // glObj.trsc[0].rotate = new Point3d_GL(0, 0, 0);
             glObj.trsc[0] = new trsc(Matrix4x4f.Identity);
-            return buffersGl.add_obj(glObj.setBuffers());
+            return buffersGl.add_obj(glObj);
         }
         void add_buff_gl_id(float[] data_v, float[] data_c, float[] data_n, PrimitiveType tp,int id)
         {
+
             buffersGl.add_obj(new openGlobj(data_v, data_c, data_n, null,tp,id));
         }
 

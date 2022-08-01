@@ -25,6 +25,7 @@ namespace Graphic
         {
             if (opgl_obj.animType == openGlobj.AnimType.Dynamic)
             {
+                Console.WriteLine("openGlobj.AnimType.Dynamic");
                 objs_dynamic.Add(opgl_obj);
                 countObj++;
                 return countObj - 1;
@@ -112,6 +113,10 @@ namespace Graphic
         public void addMatrobj(int id, int i, Matrix4x4f matr)
         {
             objs_dynamic[id] = objs_dynamic[id].addMatr(i, matr);
+        }
+        public void setTranspobj(int id,  float transp)
+        {
+            objs_dynamic[id] = objs_dynamic[id].setTrasp(transp);
         }
         #endregion
 

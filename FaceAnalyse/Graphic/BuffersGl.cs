@@ -25,7 +25,6 @@ namespace Graphic
         {
             if (opgl_obj.animType == openGlobj.AnimType.Dynamic)
             {
-                Console.WriteLine("openGlobj.AnimType.Dynamic");
                 objs_dynamic.Add(opgl_obj);
                 countObj++;
                 return countObj - 1;
@@ -33,6 +32,7 @@ namespace Graphic
             else
             {
                 objs.Add(opgl_obj);
+                
                 return -1;
             }               
         }

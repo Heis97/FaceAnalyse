@@ -49,16 +49,7 @@ namespace FaceAnalyse
             face_model = GL1.addOBJ(model.mesh,model.normale, model.texture, 1, 1, pict);
             //GL1.buffersGl.setTranspobj(face_model, 0.3f);
 
-            var flatxy1 = GL1.addFlat3d_XY(0);
-            GL1.buffersGl.setTranspobj(flatxy1, 0.3f);
-            var flatxy2 = GL1.addFlat3d_XY(0.2);
-            GL1.buffersGl.setTranspobj(flatxy2, 0.3f);
-
-            var flatzy1 = GL1.addFlat3d_ZY(-0.2);
-            GL1.buffersGl.setTranspobj(flatzy1, 0.3f);
-
-            var flatzy2 = GL1.addFlat3d_ZY(0.2);
-            GL1.buffersGl.setTranspobj(flatzy2, 0.3f);
+            
             GL1.buffersGl.setMatrobj(face_model, 0, trsc.toGLmatrix(model.matrix_norm));
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(1, 0, 0), new Point3d_GL(0, 1, 0), new Point3d_GL(0, 0, 1));
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(-1, 0, 0), new Point3d_GL(0, -1, 0), new Point3d_GL(0, 0, -1));
@@ -85,7 +76,20 @@ namespace FaceAnalyse
             var mat1 = GL1.matFromMonitor(0);
             CvInvoke.Flip(mat1,mat1,FlipType.Vertical);
             imageBox1.Image = mat1;
-            GL1.glControl_Render(sender, e);           
+            GL1.glControl_Render(sender, e);
+
+            var data = GL1.isolines_data.getData();
+            {
+                if(data!=null)
+                {
+                    var ps3d = Point3d_GL.dataToPoints(data);
+                    Console.WriteLine(GL1.toStringBuf(data, 4, 0, "det"));
+                    GL1.addMeshWithoutNorm(Point3d_GL.toMesh(ps3d), PrimitiveType.Points,1,1,1);
+                    
+                }
+            }
+            
+
         }
 
         private void glControl1_MouseDown(object sender, MouseEventArgs e)
@@ -285,7 +289,16 @@ namespace FaceAnalyse
             var ps3d = face.getPoints3d();
             GL1.addMeshWithoutNorm(Point3d_GL.toMesh(ps3d), PrimitiveType.Points);
             GL1.addMeshWithoutNorm(Point3d_GL.toMesh(face.centerEye.ToArray()), PrimitiveType.Lines, 0.9f);
+            var flatxy1 = GL1.addFlat3d_XY(0);
+            GL1.buffersGl.setTranspobj(flatxy1, 0.3f);
+            var flatxy2 = GL1.addFlat3d_XY(0.2);
+            GL1.buffersGl.setTranspobj(flatxy2, 0.3f);
 
+            var flatzy1 = GL1.addFlat3d_ZY(-0.2);
+            GL1.buffersGl.setTranspobj(flatzy1, 0.3f);
+
+            var flatzy2 = GL1.addFlat3d_ZY(0.2);
+            GL1.buffersGl.setTranspobj(flatzy2, 0.3f);
             GL1.SortObj();
             
         }

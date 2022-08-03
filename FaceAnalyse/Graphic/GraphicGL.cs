@@ -193,7 +193,7 @@ namespace Graphic
         IDs idsCs = new IDs();
         public int landmark_len = 100;
 
-        public TextureGL landmark2d_data, landmark3d_data;
+        public TextureGL landmark2d_data, landmark3d_data, isolines_data;
         public List<float[]> dataComputeShader = new List<float[]>();
         bool initComputeShader = false;
         public float[] resultComputeShader;
@@ -352,8 +352,10 @@ namespace Graphic
             //initComputeShader = init_textures(dataComputeShader);
             landmark2d_data = new TextureGL(1, landmark_len, 1, PixelFormat.Rgba);
             landmark3d_data = new TextureGL(2, landmark_len, 1, PixelFormat.Rgba);
+
+            isolines_data = new TextureGL(3, 100, 1, PixelFormat.Rgba);
             //Gl.Enable(EnableCap.CullFace);
-           Gl.Enable(EnableCap.DepthTest);
+            Gl.Enable(EnableCap.DepthTest);
         }
 
         #region addBuffer
@@ -524,10 +526,11 @@ namespace Graphic
         {
             if (buff == null)
                 return name + " null ";
-            string txt = name + " " + buff.Length;
+            var txt = new StringBuilder();
+            txt.Append( name + " " + buff.Length);
             for (int i = 0; i < buff.Length / strip; i++)
             {
-                txt += "  | \n";
+                txt.Append("  | \n");
                 for (int j = 0; j < strip; j++)
                 {
                     
@@ -535,19 +538,19 @@ namespace Graphic
                     {
                         if (j % substrip == 0)
                         {
-                            txt += "  | ";
+                            txt.Append("  | ");
                         }
-                        txt += buff[i * strip + j].ToString() + ", ";
+                        txt.Append(buff[i * strip + j].ToString() + ", ");
                     }
                     else
                     {
-                        txt += buff[i * strip + j].ToString() + ", ";
+                        txt.Append(buff[i * strip + j].ToString() + ", ");
                     }
 
                 }
             }
-            txt += " |\n--------------------------------\n";
-            return txt;
+            txt.Append(" |\n--------------------------------\n");
+            return txt.ToString();
 
         }
         public void SaveToFolder(string folder,int id)

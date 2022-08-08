@@ -210,6 +210,96 @@ namespace Geometry
             }
             return ps;
         }
+
+        public static Point3d_GL[] dataToLines(float[] data)
+        {
+            var ps = new Point3d_GL[data.Length / 4];
+            for (int i = 0; i < ps.Length; i++)
+            {
+                ps[i].x = data[4 * i];
+                ps[i].y = data[4 * i + 1];
+                ps[i].z = data[4 * i + 2];
+
+                i++;
+
+                ps[i].x = data[4 * i];
+                ps[i].y = data[4 * i + 1];
+                ps[i].z = data[4 * i + 2];
+            }
+            return ps;
+        }
+
+        public static Point3d_GL[] dataToLines_2(float[] data)
+        {
+            var ps = new Point3d_GL[data.Length / 4];
+            int i_c = 0;
+            for (int i = 0; i < ps.Length/2; i++)
+            {
+                ps[i_c].x = data[4 * i];
+                ps[i_c].y = data[4 * i + 1];
+                ps[i_c].z = data[4 * i + 2];
+                i_c++;
+                var i1 = i + ps.Length / 2;
+
+                ps[i_c].x = data[4 * i1];
+                ps[i_c].y = data[4 * i1 + 1];
+                ps[i_c].z = data[4 * i1 + 2];
+                i_c++;
+            }
+            return ps;
+        }
+
+        public static Point3d_GL[][] dataToLines_3(float[] data,int lines_count)
+        {
+            var ps = new Point3d_GL[lines_count][];
+            int len_line = ps.Length / (lines_count * 4);
+            for (int i = 0; i < lines_count; i++)
+            {
+                ps[i] = new Point3d_GL[len_line];
+                for(int j = 0; j < len_line; j++)
+                {
+                    var ind = (j+i*len_line )* 4;
+                    ps[i][j].x = data[ind];
+                    ps[i][j].y = data[ind + 1];
+                    ps[i][j].z = data[ind + 2];
+                }
+            }
+            return ps;
+        }
+
+        public static Point3d_GL[] connect_points(Point3d_GL[] ps)
+        {
+            var ps_con = new List<Point3d_GL>();
+            var ps_l = ps.ToList();
+
+            ps_con.Add(ps[0]);
+            ps_l.RemoveAt(0);
+            for (int i=0;i< ps_l.Count; i++)
+            {
+                var ind_i = get_nearest_point(ps_con[ps_con.Count - 1], ps_l);
+                var dist = (ps_con[ps_con.Count - 1] - ps_l[ind_i]).magnitude();
+                if (dist > 0.001 && dist < 0.1) ps_con.Add(ps_l[ind_i]);
+                ps_l.RemoveAt(ind_i);
+            }
+            return ps_con.ToArray();
+        }
+
+        public static int get_nearest_point(Point3d_GL p, List<Point3d_GL> ps)
+        {
+            int i_min = 0;
+            double dist_min = double.MaxValue;
+            for (int i = 0; i < ps.Count; i++)
+            {
+                var dist = (p - ps[i]).magnitude();
+                if (dist < dist_min)
+                {
+                    i_min = i;
+                    dist_min = dist;
+                }
+            }
+            return i_min;
+        }
+
         public static Point3d_GL operator +(Point3d_GL p, Vector3d_GL v1)
         {
             return new Point3d_GL(p.x + v1.x, p.y + v1.y, p.z + v1.z);

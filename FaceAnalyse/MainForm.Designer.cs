@@ -48,6 +48,7 @@ namespace FaceAnalyse
             this.but_align_face = new System.Windows.Forms.Button();
             this.but_show_faces = new System.Windows.Forms.Button();
             this.but_norm_inv = new System.Windows.Forms.Button();
+            this.but_comp_isoline = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_X_L)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Y_L)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_Z_L)).BeginInit();
@@ -218,11 +219,22 @@ namespace FaceAnalyse
             this.but_norm_inv.UseVisualStyleBackColor = true;
             this.but_norm_inv.Click += new System.EventHandler(this.but_norm_inv_Click);
             // 
+            // but_comp_isoline
+            // 
+            this.but_comp_isoline.Location = new System.Drawing.Point(737, 506);
+            this.but_comp_isoline.Name = "but_comp_isoline";
+            this.but_comp_isoline.Size = new System.Drawing.Size(115, 43);
+            this.but_comp_isoline.TabIndex = 16;
+            this.but_comp_isoline.Text = "Посчитать изолинии";
+            this.but_comp_isoline.UseVisualStyleBackColor = true;
+            this.but_comp_isoline.Click += new System.EventHandler(this.but_comp_isoline_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1370, 749);
+            this.Controls.Add(this.but_comp_isoline);
             this.Controls.Add(this.but_norm_inv);
             this.Controls.Add(this.but_show_faces);
             this.Controls.Add(this.but_align_face);
@@ -269,6 +281,7 @@ namespace FaceAnalyse
         private System.Windows.Forms.Button but_align_face;
         private System.Windows.Forms.Button but_show_faces;
         private System.Windows.Forms.Button but_norm_inv;
+        private System.Windows.Forms.Button but_comp_isoline;
     }
 }
 

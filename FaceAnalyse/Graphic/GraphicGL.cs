@@ -133,12 +133,16 @@ namespace Graphic
         public int show_faces_ID;
         public int transparency_ID;
         public int inv_norm_ID;
-        
+        public int[] surfs_cross_ID = new int[30];
+        public int surfs_len_ID;
+
     }
     public class GraphicGL
     {
         #region vars
         static float PI = 3.1415926535f;
+        public Vertex4f[] surfs_cross = new Vertex4f[30];
+        public int surfs_len = 0;
         public int inv_norm = 0;
         public int show_faces = 0;
         public int startGen = 0;
@@ -254,7 +258,7 @@ namespace Graphic
                 render_count = 0;
             }
         }
-
+        
         void renderGlobj(openGlobj opgl_obj)
         {
             if(opgl_obj.visible)
@@ -307,7 +311,6 @@ namespace Graphic
         public void glControl_ContextDestroying(object sender, GlControlEventArgs e)
         {
         }
-
         public void glControl_ContextCreated(object sender, GlControlEventArgs e)
         {
             sizeControl = ((Control)sender).Size;
@@ -317,6 +320,7 @@ namespace Graphic
             Gl.BlendFunc(BlendingFactor.SrcAlpha,BlendingFactor.OneMinusSrcAlpha);
             Gl.ClearColor(0.9f, 0.9f, 0.95f, 0.0f);
             Gl.PointSize(5f);
+            Gl.LineWidth(3f);
             Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 
@@ -353,7 +357,7 @@ namespace Graphic
             landmark2d_data = new TextureGL(1, landmark_len, 1, PixelFormat.Rgba);
             landmark3d_data = new TextureGL(2, landmark_len, 1, PixelFormat.Rgba);
 
-            isolines_data = new TextureGL(3, 100, 1, PixelFormat.Rgba);
+            isolines_data = new TextureGL(3, 8000, 1, PixelFormat.Rgba);
             //Gl.Enable(EnableCap.CullFace);
             Gl.Enable(EnableCap.DepthTest);
         }
@@ -413,6 +417,12 @@ namespace Graphic
             ids.show_faces_ID = Gl.GetUniformLocation(ids.programID, "show_faces");
             ids.transparency_ID = Gl.GetUniformLocation(ids.programID, "transparency");
             ids.inv_norm_ID = Gl.GetUniformLocation(ids.programID, "inv_norm");
+            ids.surfs_len_ID = Gl.GetUniformLocation(ids.programID, "surfs_len");
+
+            for(int i=0; i<surfs_cross.Length;i++)
+            {
+                ids.surfs_cross_ID[i] = Gl.GetUniformLocation(ids.programID, "surfs_cross[" + i + "]");
+            }
         }
         private void load_vars_gl(IDs ids, openGlobj openGlobj)
         {
@@ -455,7 +465,11 @@ namespace Graphic
             Gl.Uniform1i(ids.show_faces_ID, 1, show_faces);
             Gl.Uniform1f(ids.transparency_ID, 1, openGlobj.transparency);
             Gl.Uniform1i(ids.inv_norm_ID, 1, inv_norm);
-
+            Gl.Uniform1i(ids.surfs_len_ID, 1, surfs_len);
+            for (int i = 0; i < surfs_cross.Length; i++)
+            {
+                Gl.Uniform4f(ids.surfs_cross_ID[i], 1, surfs_cross[i]);
+            }
         }
 
         #region texture
@@ -1224,6 +1238,23 @@ namespace Graphic
                 mesh.Add((float)p.y);
                 mesh.Add((float)p.z);
             }
+            addMeshWithoutNorm(mesh.ToArray(), PrimitiveType.Lines, r, g, b);
+        }
+
+        public void addLineMesh2(Point3d_GL[] points, float r = 0.1f, float g = 0.1f, float b = 0.1f)
+        {
+            var mesh = new List<float>();
+            for(int i=1; i<points.Length;i++)
+            {
+                mesh.Add((float)points[i-1].x);
+                mesh.Add((float)points[i-1].y);
+                mesh.Add((float)points[i-1].z);
+
+                mesh.Add((float)points[i].x);
+                mesh.Add((float)points[i].y);
+                mesh.Add((float)points[i].z);
+            }
+            Console.WriteLine(toStringBuf(mesh.ToArray(), 6, 3,"lines"));
             addMeshWithoutNorm(mesh.ToArray(), PrimitiveType.Lines, r, g, b);
         }
         void addLineMesh(Vertex4f[] points, float r = 0.1f, float g = 0.1f, float b = 0.1f)

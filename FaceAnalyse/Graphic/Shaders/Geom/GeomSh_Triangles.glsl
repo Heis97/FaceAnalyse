@@ -9,12 +9,14 @@ uniform vec3 LightPosition_world;
 uniform mat4 VPs[4];
 uniform mat4 Vs[4];
 uniform mat4 Ps[4];
+uniform vec4 surfs_cross[30];
 uniform vec2 MouseLoc;
 uniform vec2 MouseLocGL;
 uniform int comp_proj;
 uniform int render_count;
 uniform int show_faces;
 uniform int inv_norm;
+uniform int surfs_len;
 
 
 in VS_GS_INTERFACE
@@ -73,30 +75,65 @@ bool cross_affil(vec3 p1, vec3 p2,vec4 flat1, out vec3 p_aff)
 		return (false);
 	}
 }
-	
-void save_point(vec3 p)
+void save_point(vec3 p, int y)
 {
-	ivec2 ind_pos = ivec2(imageSize(isolines).x - 1, 0);
+	ivec2 ind_pos = ivec2(imageSize(isolines).x - 1, y);
 	int i = int(imageLoad(isolines, ind_pos).x); ;
-	if (i < 90)
+	if (i < 7990)
 	{
-		imageStore(isolines, ivec2(i, 0), vec4(p, 0));
+		imageStore(isolines, ivec2(i, y), vec4(p, 0));
 		i++;
 		imageStore(isolines, ind_pos, vec4(i, 0, 0, 0));
-	}	
+	}
 }
-void find_points_isoline()
+void find_points_isoline(vec4 surf,int y)
 {
 	for (int i = 0; i < 3; i++)
 	{
 		vec3 p_aff = vec3(0);
 		int i1 = i + 1; if (i1 > 2) i1 = 0;
-		if (cross_affil(vs_out[i1].vertexPosition_world, vs_out[i].vertexPosition_world,vec4(1,0,0,0), p_aff))
+		if (cross_affil(vs_out[i1].vertexPosition_world, vs_out[i].vertexPosition_world, surf, p_aff))
 		{
-			save_point(p_aff);
+			save_point(p_aff,y);
+			return;
 		}
 	}
 }
+/*void save_point(vec3 p, int x, int y)
+{
+	if (x < 4990)
+	{
+		if (y < 2)
+		{			
+			imageStore(isolines, ivec2(x, y), vec4(p, x));
+		}		
+	}	
+}
+void find_points_isoline(vec4 surf)
+{
+	int y = 0;
+	ivec2 ind_pos = ivec2(imageSize(isolines).x - 1, 0);
+	int x = int(imageLoad(isolines, ind_pos).x);
+	bool x_plus = false;
+	for (int i = 0; i < 3; i++)
+	{
+		vec3 p_aff = vec3(0);
+		int i1 = i + 1; if (i1 > 2) i1 = 0;
+		if (cross_affil(vs_out[i1].vertexPosition_world, vs_out[i].vertexPosition_world, surf, p_aff))
+		{
+			save_point(p_aff,x,y);
+			y++;
+			x_plus = true;
+		}
+	}
+	if (x_plus)
+	{
+		x++;
+		imageStore(isolines, ind_pos, vec4(x, 0, 0, 0));	
+		
+	}
+
+}*/
 
 
 
@@ -165,13 +202,16 @@ void main()
 	vec4 C = Vs[gl_InvocationID] * vec4(vs_out[2].vertexPosition_world, 1.0);
 	vec4 n = vec4(normalize((comp_norm(A.xyz, B.xyz, C.xyz))), 0);
 	bool selected_triangle = checkPointInTriangle(A.xy,B.xy,C.xy,MouseLocGL);
-	find_points_isoline();
+	
 	if (comp_proj == 1)
 	{
 		compProjection(Vs[gl_InvocationID],A,B,C,n);
+		for (int i = 0; i < surfs_len; i++)
+		{
+			find_points_isoline(surfs_cross[i],i);
+		}
+		
 	}
-	
-
 
    for (int i = 0; i < gl_in.length(); i++)
    { 

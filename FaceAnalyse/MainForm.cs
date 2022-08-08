@@ -53,6 +53,7 @@ namespace FaceAnalyse
             GL1.buffersGl.setMatrobj(face_model, 0, trsc.toGLmatrix(model.matrix_norm));
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(1, 0, 0), new Point3d_GL(0, 1, 0), new Point3d_GL(0, 0, 1));
             GL1.addFrame(new Point3d_GL(0, 0, 0), new Point3d_GL(-1, 0, 0), new Point3d_GL(0, -1, 0), new Point3d_GL(0, 0, -1));
+            
         }
 
         
@@ -78,16 +79,7 @@ namespace FaceAnalyse
             imageBox1.Image = mat1;
             GL1.glControl_Render(sender, e);
 
-            var data = GL1.isolines_data.getData();
-            {
-                if(data!=null)
-                {
-                    var ps3d = Point3d_GL.dataToPoints(data);
-                    Console.WriteLine(GL1.toStringBuf(data, 4, 0, "det"));
-                    GL1.addMeshWithoutNorm(Point3d_GL.toMesh(ps3d), PrimitiveType.Points,1,1,1);
-                    
-                }
-            }
+            
             
 
         }
@@ -271,6 +263,31 @@ namespace FaceAnalyse
             GL1.planeXY();
         }
 
+        async void comp_isoline()
+        {
+            GL1.isolines_data.setData(null);
+            GL1.surfs_len = 2;
+            GL1.isolines_data = new TextureGL(3, 8000, GL1.surfs_len, PixelFormat.Rgba);
+            GL1.surfs_cross[0] = new Vertex4f(0, 1, 0, 0);
+            GL1.surfs_cross[1] = new Vertex4f(0, 1, 0, 0.2f);
+           
+
+            GL1.comp_proj = 1;
+            await Task.Delay(50);
+            GL1.comp_proj = 0;
+            var data = GL1.isolines_data.getData();
+            {
+                if (data != null)
+                {
+                    var lns3d = Point3d_GL.dataToLines_3(data, GL1.surfs_len)[0];
+                    //var ps3d = Point3d_GL.connect_points( Point3d_GL.dataToPoints(data));
+                    //Console.WriteLine(GL1.toStringBuf(data, data.Length/2, 4, "isoline"));
+                    GL1.addLineMesh2(lns3d, 1, 1, 1);
+                }
+            }
+            GL1.SortObj();
+        }
+
         async void det_landmark()
         {
            
@@ -371,6 +388,11 @@ namespace FaceAnalyse
             {
                 GL1.inv_norm = 0;
             }
+        }
+
+        private void but_comp_isoline_Click(object sender, EventArgs e)
+        {
+            comp_isoline();
         }
 
 
